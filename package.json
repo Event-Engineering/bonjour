@@ -1,5 +1,5 @@
 {
-  "name": "bonjour",
+  "name": "@eventengineering/bonjour",
   "version": "3.5.0",
   "description": "A Bonjour/Zeroconf implementation in pure JavaScript",
   "main": "index.js",
@@ -21,7 +21,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/watson/bonjour.git"
+    "url": "git+https://github.com/Event-Engineering/bonjour.git"
   },
   "keywords": [
     "bonjour",
@@ -45,5 +45,9 @@
   "coordinates": [
     55.68250900965318,
     12.586377442991648
-  ]
+  ],
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  }
 }
