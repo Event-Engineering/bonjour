@@ -35,12 +35,12 @@
     "broadcast",
     "dns-sd"
   ],
-  "author": "Thomas Watson Steen <w@tson.dk> (https://twitter.com/wa7son)",
+  "author": "Event Engineering Ltd",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/watson/bonjour/issues"
+    "url": "https://github.com/Event-Engineering/bonjour/issues"
   },
-  "homepage": "https://github.com/watson/bonjour",
+  "homepage": "https://github.com/Event-Engineering/bonjour",
   "coordinates": [
     55.68250900965318,
     12.586377442991648
