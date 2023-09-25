@@ -1,53 +1,50 @@
 {
-  "name": "@eventengineering/bonjour",
-  "version": "3.5.0",
-  "description": "A Bonjour/Zeroconf implementation in pure JavaScript",
-  "main": "index.js",
-  "dependencies": {
-    "array-flatten": "^2.1.0",
-    "deep-equal": "^1.0.1",
-    "dns-equal": "^1.0.0",
-    "dns-txt": "^2.0.2",
-    "multicast-dns": "^6.0.1",
-    "multicast-dns-service-types": "^1.1.0"
-  },
-  "devDependencies": {
-    "after-all": "^2.0.2",
-    "standard": "^7.0.1",
-    "tape": "^4.5.1"
-  },
-  "scripts": {
-    "test": "standard && tape test/*.js"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Event-Engineering/bonjour.git"
-  },
-  "keywords": [
-    "bonjour",
-    "zeroconf",
-    "zero",
-    "configuration",
-    "mdns",
-    "dns",
-    "service",
-    "discovery",
-    "multicast",
-    "broadcast",
-    "dns-sd"
-  ],
-  "author": "Thomas Watson Steen <w@tson.dk> (https://twitter.com/wa7son)",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/watson/bonjour/issues"
-  },
-  "homepage": "https://github.com/watson/bonjour",
-  "coordinates": [
-    55.68250900965318,
-    12.586377442991648
-  ],
-  "directories": {
-    "lib": "lib",
-    "test": "test"
-  }
+	"name": "@eventengineering/bonjour",
+	"version": "3.5.0",
+	"description": "A Bonjour/Zeroconf implementation in pure JavaScript",
+	"main": "index.js",
+	"type": "module",
+	"dependencies": {
+		"deep-equal": "^1.0.1",
+		"dns-equal": "^1.0.0",
+		"dns-txt": "^2.0.2",
+		"eslint": "^8.29.0",
+		"multicast-dns": "^6.0.1",
+		"multicast-dns-service-types": "^1.1.0"
+	},
+	"devDependencies": {
+		"after-all": "^2.0.2",
+		"standard": "^7.0.1",
+		"tape": "^4.5.1"
+	},
+	"scripts": {
+		"test": "standard && tape test/*.js"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Event-Engineering/bonjour.git"
+	},
+	"keywords": [
+		"bonjour",
+		"zeroconf",
+		"zero",
+		"configuration",
+		"mdns",
+		"dns",
+		"service",
+		"discovery",
+		"multicast",
+		"broadcast",
+		"dns-sd"
+	],
+	"author": "Event Engineering Ltd",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/Event-Engineering/bonjour/issues"
+	},
+	"homepage": "https://github.com/Event-Engineering/bonjour",
+	"directories": {
+		"lib": "lib",
+		"test": "test"
+	}
 }

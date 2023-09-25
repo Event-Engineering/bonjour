@@ -15,7 +15,8 @@ npm install @eventengineering/bonjour
 ## Usage
 
 ```js
-var bonjour = require('@eventengineering/bonjour')()
+import Bonjour from '@eventengineering/bonjour';
+const bonjour = new Bonjour();
 
 // advertise an HTTP server on port 3000
 bonjour.publish({ name: 'My Web Server', type: 'http', port: 3000 })
@@ -31,7 +32,8 @@ bonjour.find({ type: 'http' }, function (service) {
 ### Initializing
 
 ```js
-var bonjour = require('@eventengineering/bonjour')([options])
+import Bonjour from '@eventengineering/bonjour';
+const bonjour = new Bonjour([options]);
 ```
 
 The `options` are optional and will be used when initializing the
