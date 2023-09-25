@@ -79,12 +79,12 @@ test('bonjour.find', (bonjour, t) => {
 				t.equal(s.name, 'Foo Bar');
 				t.equal(s.fqdn, 'Foo Bar._test._tcp.local');
 				t.deepEqual(s.txt, {});
-				t.deepEqual(s.rawTxt, new Buffer('00', 'hex'));
+				t.deepEqual(s.rawTxt, Buffer.from('00', 'hex'));
 			} else {
 				t.equal(s.name, 'Baz');
 				t.equal(s.fqdn, 'Baz._test._tcp.local');
 				t.deepEqual(s.txt, { foo: 'bar' });
-				t.deepEqual(s.rawTxt, new Buffer('07666f6f3d626172', 'hex'));
+				t.deepEqual(s.rawTxt, Buffer.from('07666f6f3d626172', 'hex'));
 			}
 
 			t.equal(s.host, os.hostname());
@@ -120,14 +120,14 @@ test('bonjour.find - binary txt', (bonjour, t) => {
 
 		browser.on('up', (s) => {
 			t.equal(s.name, 'Foo');
-			t.deepEqual(s.txt, { bar: new Buffer('buz') });
-			t.deepEqual(s.rawTxt, new Buffer('076261723d62757a', 'hex'));
+			t.deepEqual(s.txt, { bar: Buffer.from('buz') });
+			t.deepEqual(s.rawTxt, Buffer.from('076261723d62757a', 'hex'));
 			bonjour.destroy();
 			t.end();
 		});
 	});
 
-	bonjour.publish({ name: 'Foo', type: 'test', port: 3000, txt: { bar: new Buffer('buz') } }).on('up', next());
+	bonjour.publish({ name: 'Foo', type: 'test', port: 3000, txt: { bar: Buffer.from('buz') } }).on('up', next());
 });
 
 test('bonjour.find - down event', (bonjour, t) => {
