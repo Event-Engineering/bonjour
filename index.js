@@ -1,6 +1,7 @@
-import Registry from './lib/registry';
-import Server from './lib/mdns-server';
-import Browser from './lib/browser';
+export {default as Registry} from './lib/registry.js';
+export {default as Server} from './lib/mdns-server.js';
+export {default as Browser} from './lib/browser.js';
+export {default as Service} from './lib/service.js';
 
 export default class Bonjour {
 	#server;
