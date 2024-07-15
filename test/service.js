@@ -18,21 +18,21 @@ function getAddressesRecords(host) {
 
 test('no name', (t) => {
 	t.throws(() => {
-		new Service({ type: 'http', port: 3000 }); // eslint-disable-line no-new
+		new Service({ type: 'http', port: 3000 });
 	}, 'Required name not given');
 	t.end();
 });
 
 test('no type', (t) => {
 	t.throws(() => {
-		new Service({ name: 'Foo-Bar', port: 3000 }); // eslint-disable-line no-new
+		new Service({ name: 'Foo-Bar', port: 3000 });
 	}, 'Required type not given');
 	t.end();
 });
 
 test('no port', (t) => {
 	t.throws(() => {
-		new Service({ name: 'Foo-Bar', type: 'http' }); // eslint-disable-line no-new
+		new Service({ name: 'Foo-Bar', type: 'http' });
 	}, 'Required port not given');
 	t.end();
 });
