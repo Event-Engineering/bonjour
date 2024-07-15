@@ -76,7 +76,7 @@ test('_records() - minimal', (t) => {
 		{ data: s.fqdn, name: '_http._tcp.local', ttl: 28800, type: 'PTR' },
 		{ data: { port: 3000, target: os.hostname() }, name: s.fqdn, ttl: 120, type: 'SRV' },
 		{ data: Buffer.from('00', 'hex'), name: s.fqdn, ttl: 4500, type: 'TXT' },
-	].concat(getAddressesRecords(s.host)));
+	].concat(getAddressesRecords(s.host + '.local')));
 	t.end();
 });
 
@@ -87,6 +87,6 @@ test('_records() - everything', (t) => {
 		{ data: s.fqdn, name: '_http._tcp.local', ttl: 28800, type: 'PTR' },
 		{ data: { port: 3000, target: 'example.com' }, name: s.fqdn, ttl: 120, type: 'SRV' },
 		{ data: Buffer.from('07666f6f3d626172', 'hex'), name: s.fqdn, ttl: 4500, type: 'TXT' },
-	].concat(getAddressesRecords(s.host)));
+	].concat(getAddressesRecords(s.host + '.local')));
 	t.end();
 });
