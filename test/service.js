@@ -23,10 +23,120 @@ test('no name', (t) => {
 	t.end();
 });
 
+test('empty name', (t) => {
+	t.throws(() => {
+		new Service({ name: '', type: 'http', port: 3000 });
+	}, 'Required name not given');
+	t.end();
+});
+
+test('invalid character name', (t) => {
+	t.throws(() => {
+		new Service({ name: '@', type: 'http', port: 3000 });
+	}, 'Invalid name given');
+	t.end();
+});
+
+test('invalid characters in name', (t) => {
+	t.throws(() => {
+		new Service({ name: 'Foo Bar', type: 'http', port: 3000 });
+	}, 'Invalid name given');
+	t.end();
+});
+
+test('oversized name', (t) => {
+	t.throws(() => {
+		new Service({ name: 'this-is-a-long-name', type: 'http', port: 3000 });
+	}, 'Invalid name given');
+	t.end();
+});
+
+test('invalid start character in name', (t) => {
+	t.throws(() => {
+		new Service({ name: '00foo-bar', type: 'http', port: 3000 });
+	}, 'Invalid name given');
+	t.end();
+});
+
+test('invalid end character in name', (t) => {
+	t.throws(() => {
+		new Service({ name: 'foo-bar-', type: 'http', port: 3000 });
+	}, 'Invalid name given');
+	t.end();
+});
+
+test('valid weird start characters in name', (t) => {
+	let s = new Service({ name: '0-foo-bar', type: 'http', port: 3000 });
+	t.equals(s.name, '0-foo-bar');
+	t.end();
+});
+
+test('double dash in name', (t) => {
+	t.throws(() => {
+		new Service({ name: 'foo--bar', type: 'http', port: 3000 });
+	}, 'Invalid name given');
+	t.end();
+});
+
 test('no type', (t) => {
 	t.throws(() => {
 		new Service({ name: 'Foo-Bar', port: 3000 });
 	}, 'Required type not given');
+	t.end();
+});
+
+test('empty type', (t) => {
+	t.throws(() => {
+		new Service({ name: 'Foo-Bar', type: '', port: 3000 });
+	}, 'Required name not given');
+	t.end();
+});
+
+test('invalid character type', (t) => {
+	t.throws(() => {
+		new Service({ name: 'Foo-Bar', type: '@', port: 3000 });
+	}, 'Invalid type given');
+	t.end();
+});
+
+test('invalid characters in type', (t) => {
+	t.throws(() => {
+		new Service({ name: 'Foo-Bar', type: 'ht tp', port: 3000 });
+	}, 'Invalid type given');
+	t.end();
+});
+
+test('oversized type', (t) => {
+	t.throws(() => {
+		new Service({ name: 'Foo-Bar', type: 'this-is-a-long-name', port: 3000 });
+	}, 'Invalid type given');
+	t.end();
+});
+
+test('invalid start character in type', (t) => {
+	t.throws(() => {
+		new Service({ name: 'Foo-Bar', type: '00foo-bar', port: 3000 });
+	}, 'Invalid type given');
+	t.end();
+});
+
+test('invalid end character in type', (t) => {
+	t.throws(() => {
+		new Service({ name: 'Foo-Bar', type: 'foo-bar-', port: 3000 });
+	}, 'Invalid type given');
+	t.end();
+});
+
+test('valid weird start characters in type', (t) => {
+	let s = new Service({ name: 'Foo-Bar', type: '0-foo-bar', port: 3000 });
+	t.equals(s.type, '_0-foo-bar._tcp');
+	t.end();
+});
+
+test('double dash in type', (t) => {
+	t.throws(() => {
+		new Service({ name: 'Foo-Bar', type: 'foo--bar', port: 3000 });
+	}, 'Invalid type given');
 	t.end();
 });
 
