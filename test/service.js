@@ -37,7 +37,31 @@ test('no port', (t) => {
 	t.end();
 });
 
-// TODO test validation of name, type, and port
+test('negative port', (t) => {
+	t.throws(() => {
+		new Service({ name: 'Foo-Bar', type: 'http', port: -1 });
+	}, 'Invalid port. Port number must be between 0 and 65535 (16-bit)');
+	t.end();
+});
+
+test('zero port', (t) => {
+	let s = new Service({ name: 'Foo-Bar', type: 'http', port: 0 });
+	t.equal(s.port, 0);
+	t.end();
+});
+
+test('max port', (t) => {
+	let s = new Service({ name: 'Foo-Bar', type: 'http', port: 65535 });
+	t.equal(s.port, 65535);
+	t.end();
+});
+
+test('excessive port', (t) => {
+	t.throws(() => {
+		new Service({ name: 'Foo-Bar', type: 'http', port: 65536 });
+	}, 'Invalid port. Port number must be between 0 and 65535 (16-bit)');
+	t.end();
+});
 
 test('minimal', (t) => {
 	let s = new Service({ name: 'Foo-Bar', type: 'http', port: 3000 });
