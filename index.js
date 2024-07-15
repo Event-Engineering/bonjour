@@ -21,8 +21,8 @@ export default class Bonjour {
 		this.#registry.unpublishAll(cb);
 	}
 
-	find(opts, onup) {
-		return new Browser(this.#server.mdns, opts, onup);
+	find(opts, onup, ondown) {
+		return new Browser(this.#server.mdns, opts, onup, ondown);
 	}
 
 	findOne(opts, cb) {
