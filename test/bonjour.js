@@ -87,7 +87,7 @@ test('bonjour.find', (bonjour, t) => {
 				t.deepEqual(s.rawTxt, Buffer.from('07666f6f3d626172', 'hex'));
 			}
 
-			t.equal(s.host, os.hostname());
+			t.equal(s.host, os.hostname() + '.local');
 			t.equal(s.port, 3000);
 			t.equal(s.type, 'test');
 			t.equal(s.protocol, 'tcp');
