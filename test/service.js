@@ -182,7 +182,7 @@ test('minimal', (t) => {
 	t.equal(s.name, 'Foo-Bar');
 	t.equal(s.protocol, 'tcp');
 	t.equal(s.type, '_http._tcp');
-	t.equal(s.host, os.hostname());
+	t.equal(s.host, os.hostname() + '.local');
 	t.equal(s.port, 3000);
 	t.equal(s.fqdn, 'Foo-Bar._http._tcp.local');
 	t.equal(s.txt, null);
@@ -199,7 +199,7 @@ test('protocol', (t) => {
 
 test('host', (t) => {
 	let s = new Service({ name: 'Foo-Bar', type: 'http', port: 3000, host: 'example.com' });
-	t.deepEqual(s.host, 'example.com');
+	t.deepEqual(s.host, 'example.com.local');
 	t.end();
 });
 
@@ -214,9 +214,9 @@ test('_records() - minimal', (t) => {
 	t.deepEqual(s._records(), [
 		{ data: '_http._tcp.local', name: '_services._dns-sd._udp.local', ttl: 28800, type: 'PTR' },
 		{ data: s.fqdn, name: '_http._tcp.local', ttl: 28800, type: 'PTR' },
-		{ data: { port: 3000, target: os.hostname() }, name: s.fqdn, ttl: 120, type: 'SRV' },
+		{ data: { port: 3000, target: os.hostname() + '.local' }, name: s.fqdn, ttl: 120, type: 'SRV' },
 		{ data: Buffer.from('00', 'hex'), name: s.fqdn, ttl: 4500, type: 'TXT' },
-	].concat(getAddressesRecords(s.host + '.local')));
+	].concat(getAddressesRecords(s.host)));
 	t.end();
 });
 
@@ -225,8 +225,8 @@ test('_records() - everything', (t) => {
 	t.deepEqual(s._records(), [
 		{ data: '_http._tcp.local', name: '_services._dns-sd._udp.local', ttl: 28800, type: 'PTR' },
 		{ data: s.fqdn, name: '_http._tcp.local', ttl: 28800, type: 'PTR' },
-		{ data: { port: 3000, target: 'example.com' }, name: s.fqdn, ttl: 120, type: 'SRV' },
+		{ data: { port: 3000, target: 'example.com' + '.local' }, name: s.fqdn, ttl: 120, type: 'SRV' },
 		{ data: Buffer.from('07666f6f3d626172', 'hex'), name: s.fqdn, ttl: 4500, type: 'TXT' },
-	].concat(getAddressesRecords(s.host + '.local')));
+	].concat(getAddressesRecords(s.host)));
 	t.end();
 });
