@@ -25,26 +25,28 @@ test('no name', (t) => {
 
 test('no type', (t) => {
 	t.throws(() => {
-		new Service({ name: 'Foo Bar', port: 3000 }); // eslint-disable-line no-new
+		new Service({ name: 'Foo-Bar', port: 3000 }); // eslint-disable-line no-new
 	}, 'Required type not given');
 	t.end();
 });
 
 test('no port', (t) => {
 	t.throws(() => {
-		new Service({ name: 'Foo Bar', type: 'http' }); // eslint-disable-line no-new
+		new Service({ name: 'Foo-Bar', type: 'http' }); // eslint-disable-line no-new
 	}, 'Required port not given');
 	t.end();
 });
 
+// TODO test validation of name, type, and port
+
 test('minimal', (t) => {
-	let s = new Service({ name: 'Foo Bar', type: 'http', port: 3000 });
-	t.equal(s.name, 'Foo Bar');
+	let s = new Service({ name: 'Foo-Bar', type: 'http', port: 3000 });
+	t.equal(s.name, 'Foo-Bar');
 	t.equal(s.protocol, 'tcp');
 	t.equal(s.type, '_http._tcp');
 	t.equal(s.host, os.hostname());
 	t.equal(s.port, 3000);
-	t.equal(s.fqdn, 'Foo Bar._http._tcp.local');
+	t.equal(s.fqdn, 'Foo-Bar._http._tcp.local');
 	t.equal(s.txt, null);
 	t.equal(s.subtypes, null);
 	t.equal(s.published, false);
@@ -52,25 +54,25 @@ test('minimal', (t) => {
 });
 
 test('protocol', (t) => {
-	let s = new Service({ name: 'Foo Bar', type: 'http', port: 3000, protocol: 'udp' });
+	let s = new Service({ name: 'Foo-Bar', type: 'http', port: 3000, protocol: 'udp' });
 	t.deepEqual(s.protocol, 'udp');
 	t.end();
 });
 
 test('host', (t) => {
-	let s = new Service({ name: 'Foo Bar', type: 'http', port: 3000, host: 'example.com' });
+	let s = new Service({ name: 'Foo-Bar', type: 'http', port: 3000, host: 'example.com' });
 	t.deepEqual(s.host, 'example.com');
 	t.end();
 });
 
 test('txt', (t) => {
-	let s = new Service({ name: 'Foo Bar', type: 'http', port: 3000, txt: { foo: 'bar' } });
+	let s = new Service({ name: 'Foo-Bar', type: 'http', port: 3000, txt: { foo: 'bar' } });
 	t.deepEqual(s.txt, { foo: 'bar' });
 	t.end();
 });
 
 test('_records() - minimal', (t) => {
-	let s = new Service({ name: 'Foo Bar', type: 'http', protocol: 'tcp', port: 3000 });
+	let s = new Service({ name: 'Foo-Bar', type: 'http', protocol: 'tcp', port: 3000 });
 	t.deepEqual(s._records(), [
 		{ data: '_http._tcp.local', name: '_services._dns-sd._udp.local', ttl: 28800, type: 'PTR' },
 		{ data: s.fqdn, name: '_http._tcp.local', ttl: 28800, type: 'PTR' },
@@ -81,7 +83,7 @@ test('_records() - minimal', (t) => {
 });
 
 test('_records() - everything', (t) => {
-	let s = new Service({ name: 'Foo Bar', type: 'http', protocol: 'tcp', port: 3000, host: 'example.com', txt: { foo: 'bar' } });
+	let s = new Service({ name: 'Foo-Bar', type: 'http', protocol: 'tcp', port: 3000, host: 'example.com', txt: { foo: 'bar' } });
 	t.deepEqual(s._records(), [
 		{ data: '_http._tcp.local', name: '_services._dns-sd._udp.local', ttl: 28800, type: 'PTR' },
 		{ data: s.fqdn, name: '_http._tcp.local', ttl: 28800, type: 'PTR' },

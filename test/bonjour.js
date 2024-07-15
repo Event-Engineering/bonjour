@@ -75,9 +75,9 @@ test('bonjour.find', (bonjour, t) => {
 		let ups = 0;
 
 		browser.on('up', (s) => {
-			if (s.name === 'Foo Bar') {
-				t.equal(s.name, 'Foo Bar');
-				t.equal(s.fqdn, 'Foo Bar._test._tcp.local');
+			if (s.name === 'Foo-Bar') {
+				t.equal(s.name, 'Foo-Bar');
+				t.equal(s.fqdn, 'Foo-Bar._test._tcp.local');
 				t.deepEqual(s.txt, {});
 				t.deepEqual(s.rawTxt, Buffer.from('00', 'hex'));
 			} else {
@@ -109,7 +109,7 @@ test('bonjour.find', (bonjour, t) => {
 		});
 	});
 
-	bonjour.publish({ name: 'Foo Bar', type: 'test', port: 3000 }).on('up', next());
+	bonjour.publish({ name: 'Foo-Bar', type: 'test', port: 3000 }).on('up', next());
 	bonjour.publish({ name: 'Invalid', type: 'test2', port: 3000 }).on('up', next());
 	bonjour.publish({ name: 'Baz', type: 'test', port: 3000, txt: { foo: 'bar' } }).on('up', next());
 });
@@ -131,18 +131,18 @@ test('bonjour.find - binary txt', (bonjour, t) => {
 });
 
 test('bonjour.find - down event', (bonjour, t) => {
-	let service = bonjour.publish({ name: 'Foo Bar', type: 'test', port: 3000 });
+	let service = bonjour.publish({ name: 'Foo-Bar', type: 'test', port: 3000 });
 
 	service.on('up', () => {
 		let browser = bonjour.find({ type: 'test' });
 
 		browser.on('up', (s) => {
-			t.equal(s.name, 'Foo Bar');
+			t.equal(s.name, 'Foo-Bar');
 			service.stop();
 		});
 
 		browser.on('down', (s) => {
-			t.equal(s.name, 'Foo Bar');
+			t.equal(s.name, 'Foo-Bar');
 			bonjour.destroy();
 			t.end();
 		});
