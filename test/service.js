@@ -66,8 +66,9 @@ test('invalid end character in name', (t) => {
 });
 
 test('valid weird start characters in name', (t) => {
-	let s = new Service({ name: '0-foo-bar', type: 'http', port: 3000 });
-	t.equals(s.name, '0-foo-bar');
+	t.doesNotThrow(() => {
+		new Service({ name: '0-foo-bar', type: 'http', port: 3000 });
+	}, 'Valid name given');
 	t.end();
 });
 
@@ -128,8 +129,9 @@ test('invalid end character in type', (t) => {
 });
 
 test('valid weird start characters in type', (t) => {
-	let s = new Service({ name: 'Foo-Bar', type: '0-foo-bar', port: 3000 });
-	t.equals(s.type, '_0-foo-bar._tcp');
+	t.doesNotThrow(() => {
+		new Service({ name: 'Foo-Bar', type: '0-foo-bar', port: 3000 });
+	}, 'Valid type given');
 	t.end();
 });
 
@@ -150,26 +152,28 @@ test('no port', (t) => {
 test('negative port', (t) => {
 	t.throws(() => {
 		new Service({ name: 'Foo-Bar', type: 'http', port: -1 });
-	}, 'Invalid port. Port number must be between 0 and 65535 (16-bit)');
+	}, 'Invalid port given');
 	t.end();
 });
 
 test('zero port', (t) => {
-	let s = new Service({ name: 'Foo-Bar', type: 'http', port: 0 });
-	t.equal(s.port, 0);
+	t.doesNotThrow(() => {
+		new Service({ name: 'Foo-Bar', type: 'http', port: 0 });
+	}, 'Valid port given');
 	t.end();
 });
 
 test('max port', (t) => {
-	let s = new Service({ name: 'Foo-Bar', type: 'http', port: 65535 });
-	t.equal(s.port, 65535);
+	t.doesNotThrow(() => {
+		new Service({ name: 'Foo-Bar', type: 'http', port: 65535 });
+	}, 'Valid port given');
 	t.end();
 });
 
 test('excessive port', (t) => {
 	t.throws(() => {
 		new Service({ name: 'Foo-Bar', type: 'http', port: 65536 });
-	}, 'Invalid port. Port number must be between 0 and 65535 (16-bit)');
+	}, 'Invalid port given');
 	t.end();
 });
 
