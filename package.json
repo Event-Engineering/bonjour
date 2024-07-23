@@ -9,8 +9,7 @@
 		"dns-equal": "^1.0.0",
 		"dns-txt": "^2.0.2",
 		"eslint": "^8.29.0",
-		"multicast-dns": "^6.0.1",
-		"multicast-dns-service-types": "^1.1.0"
+		"multicast-dns": "^6.0.1"
 	},
 	"devDependencies": {
 		"after-all": "^2.0.2",
