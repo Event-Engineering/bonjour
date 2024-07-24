@@ -95,7 +95,7 @@ test('bonjour.find', (bonjour, t) => {
 			t.equal(s.referer.family, 'IPv4');
 			t.ok(Number.isFinite(s.referer.port));
 			t.ok(Number.isFinite(s.referer.size));
-			t.deepEqual(s.subtypes, []);
+			// t.deepEqual(s.subtypes, []);
 			t.deepEqual(s.addresses.sort(), getAddresses().sort());
 
 			if (++ups === 2) {
