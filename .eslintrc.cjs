@@ -24,6 +24,6 @@ module.exports = {
 		'no-inner-declarations': 'off',
 		'no-prototype-builtins': 'off',
 		'no-empty': ['error', { allowEmptyCatch: true }],
-		'function-call-argument-newline': ['consistent'],
+		'function-call-argument-newline': ['error', 'consistent'],
 	},
 };
