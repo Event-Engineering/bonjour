@@ -2,6 +2,8 @@ import {default as Bonjour, Service} from '../index.js';
 
 let b = new Bonjour({});
 
+console.debug('Searching for HTTP services');
+
 b.find({type: 'http'}, (service) => {
 	console.debug('Up', service);
 }, (service) => {
