@@ -24,7 +24,7 @@ function port(cb) {
 		let port = s.address().port;
 		s.on('close', () => {
 			cb(port);
-		})
+		});
 		s.close();
 	});
 }
