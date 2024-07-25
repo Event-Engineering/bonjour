@@ -19,7 +19,7 @@
 		"ip": "^2.0.1"
 	},
 	"scripts": {
-		"lint": "eslint .",
+		"lint": "eslint --ext .js,.mjs,.cjs .",
 		"test": "tape test/*.js"
 	},
 	"repository": {
