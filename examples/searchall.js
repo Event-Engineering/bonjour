@@ -1,4 +1,4 @@
-import {default as Bonjour, Service} from '../index.js';
+import Bonjour from '../index.js';
 
 let b = new Bonjour({});
 

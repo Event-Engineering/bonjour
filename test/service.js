@@ -6,7 +6,7 @@ function getAddressesRecords(host) {
 	let records = [];
 	let itrs = os.networkInterfaces();
 	for (let i in itrs) {
-		let addrs = itrs[i]
+		let addrs = itrs[i];
 		for (let j in addrs) {
 			if (addrs[j].internal === false) {
 				records.push({ data: addrs[j].address, name: host, ttl: 120, type: addrs[j].family === 'IPv4' ? 'A' : 'AAAA' });
