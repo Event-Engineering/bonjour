@@ -7,7 +7,6 @@
 	"dependencies": {
 		"deep-equal": "^1.0.1",
 		"dns-equal": "^1.0.0",
-		"dns-txt": "^2.0.2",
 		"eslint": "^8.29.0",
 		"multicast-dns": "^7.2.5"
 	},
