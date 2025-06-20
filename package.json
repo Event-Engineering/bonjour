@@ -48,5 +48,8 @@
 	"directories": {
 		"lib": "lib",
 		"test": "test"
+	},
+	"volta": {
+		"node": "22.14.0"
 	}
 }
