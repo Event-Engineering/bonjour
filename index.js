@@ -13,8 +13,8 @@ export default class Bonjour {
 		this.#registry = new Registry(this.#server);
 	}
 
-	publish(opts) {
-		return this.#registry.publish(opts);
+	publishService(opts) {
+		return this.#registry.publishService(opts);
 	}
 
 	unpublishAll(cb) {
