@@ -1,7 +1,7 @@
 import Registry from './lib/registry.js';
 import Server from './lib/mdns-server.js';
 import Browser from './lib/browser.js';
-export {default as Service} from './lib/service-obj.js';
+export {default as Service} from './lib/service.js';
 export {Registry, Server, Browser};
 
 export default class Bonjour {
