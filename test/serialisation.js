@@ -1,6 +1,6 @@
-import ServiceObj from '../lib/service-obj.js';
+import {Service} from '../index.js';
 
-let original = new ServiceObj({name: 'steve'});
+let original = Service._fromObject({name: 'steve'});
 
 let a1 = structuredClone(original);
 let b1 = {...original};
