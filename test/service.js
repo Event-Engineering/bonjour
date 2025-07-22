@@ -18,167 +18,167 @@ function getAddressesRecords(host) {
 
 test('no name', (t) => {
 	t.throws(() => {
-		Service.fromOpts({ type: 'http', port: 3000 });
+		new Service({ type: 'http', port: 3000 });
 	}, 'Required name not given');
 	t.end();
 });
 
 test('empty name', (t) => {
 	t.throws(() => {
-		Service.fromOpts({ name: '', type: 'http', port: 3000 });
+		new Service({ name: '', type: 'http', port: 3000 });
 	}, 'Required name not given');
 	t.end();
 });
 
 test('invalid character name', (t) => {
 	t.throws(() => {
-		Service.fromOpts({ name: '@', type: 'http', port: 3000 });
+		new Service({ name: '@', type: 'http', port: 3000 });
 	}, 'Invalid name given');
 	t.end();
 });
 
 test('invalid characters in name', (t) => {
 	t.throws(() => {
-		Service.fromOpts({ name: 'Foo Bar', type: 'http', port: 3000 });
+		new Service({ name: 'Foo Bar', type: 'http', port: 3000 });
 	}, 'Invalid name given');
 	t.end();
 });
 
 test('oversized name', (t) => {
 	t.throws(() => {
-		Service.fromOpts({ name: 'this-is-a-long-name', type: 'http', port: 3000 });
+		new Service({ name: 'this-is-a-long-name', type: 'http', port: 3000 });
 	}, 'Invalid name given');
 	t.end();
 });
 
 test('invalid start character in name', (t) => {
 	t.throws(() => {
-		Service.fromOpts({ name: '00foo-bar', type: 'http', port: 3000 });
+		new Service({ name: '00foo-bar', type: 'http', port: 3000 });
 	}, 'Invalid name given');
 	t.end();
 });
 
 test('invalid end character in name', (t) => {
 	t.throws(() => {
-		Service.fromOpts({ name: 'foo-bar-', type: 'http', port: 3000 });
+		new Service({ name: 'foo-bar-', type: 'http', port: 3000 });
 	}, 'Invalid name given');
 	t.end();
 });
 
 test('valid weird start characters in name', (t) => {
 	t.doesNotThrow(() => {
-		Service.fromOpts({ name: '0-foo-bar', type: 'http', port: 3000 });
+		new Service({ name: '0-foo-bar', type: 'http', port: 3000 });
 	}, 'Valid name given');
 	t.end();
 });
 
 test('double dash in name', (t) => {
 	t.throws(() => {
-		Service.fromOpts({ name: 'foo--bar', type: 'http', port: 3000 });
+		new Service({ name: 'foo--bar', type: 'http', port: 3000 });
 	}, 'Invalid name given');
 	t.end();
 });
 
 test('no type', (t) => {
 	t.throws(() => {
-		Service.fromOpts({ name: 'Foo-Bar', port: 3000 });
+		new Service({ name: 'Foo-Bar', port: 3000 });
 	}, 'Required type not given');
 	t.end();
 });
 
 test('empty type', (t) => {
 	t.throws(() => {
-		Service.fromOpts({ name: 'Foo-Bar', type: '', port: 3000 });
+		new Service({ name: 'Foo-Bar', type: '', port: 3000 });
 	}, 'Required name not given');
 	t.end();
 });
 
 test('invalid character type', (t) => {
 	t.throws(() => {
-		Service.fromOpts({ name: 'Foo-Bar', type: '@', port: 3000 });
+		new Service({ name: 'Foo-Bar', type: '@', port: 3000 });
 	}, 'Invalid type given');
 	t.end();
 });
 
 test('invalid characters in type', (t) => {
 	t.throws(() => {
-		Service.fromOpts({ name: 'Foo-Bar', type: 'ht tp', port: 3000 });
+		new Service({ name: 'Foo-Bar', type: 'ht tp', port: 3000 });
 	}, 'Invalid type given');
 	t.end();
 });
 
 test('oversized type', (t) => {
 	t.throws(() => {
-		Service.fromOpts({ name: 'Foo-Bar', type: 'this-is-a-long-name', port: 3000 });
+		new Service({ name: 'Foo-Bar', type: 'this-is-a-long-name', port: 3000 });
 	}, 'Invalid type given');
 	t.end();
 });
 
 test('invalid start character in type', (t) => {
 	t.throws(() => {
-		Service.fromOpts({ name: 'Foo-Bar', type: '00foo-bar', port: 3000 });
+		new Service({ name: 'Foo-Bar', type: '00foo-bar', port: 3000 });
 	}, 'Invalid type given');
 	t.end();
 });
 
 test('invalid end character in type', (t) => {
 	t.throws(() => {
-		Service.fromOpts({ name: 'Foo-Bar', type: 'foo-bar-', port: 3000 });
+		new Service({ name: 'Foo-Bar', type: 'foo-bar-', port: 3000 });
 	}, 'Invalid type given');
 	t.end();
 });
 
 test('valid weird start characters in type', (t) => {
 	t.doesNotThrow(() => {
-		Service.fromOpts({ name: 'Foo-Bar', type: '0-foo-bar', port: 3000 });
+		new Service({ name: 'Foo-Bar', type: '0-foo-bar', port: 3000 });
 	}, 'Valid type given');
 	t.end();
 });
 
 test('double dash in type', (t) => {
 	t.throws(() => {
-		Service.fromOpts({ name: 'Foo-Bar', type: 'foo--bar', port: 3000 });
+		new Service({ name: 'Foo-Bar', type: 'foo--bar', port: 3000 });
 	}, 'Invalid type given');
 	t.end();
 });
 
 test('no port', (t) => {
 	t.throws(() => {
-		Service.fromOpts({ name: 'Foo-Bar', type: 'http' });
+		new Service({ name: 'Foo-Bar', type: 'http' });
 	}, 'Required port not given');
 	t.end();
 });
 
 test('negative port', (t) => {
 	t.throws(() => {
-		Service.fromOpts({ name: 'Foo-Bar', type: 'http', port: -1 });
+		new Service({ name: 'Foo-Bar', type: 'http', port: -1 });
 	}, 'Invalid port given');
 	t.end();
 });
 
 test('zero port', (t) => {
 	t.doesNotThrow(() => {
-		Service.fromOpts({ name: 'Foo-Bar', type: 'http', port: 0 });
+		new Service({ name: 'Foo-Bar', type: 'http', port: 0 });
 	}, 'Valid port given');
 	t.end();
 });
 
 test('max port', (t) => {
 	t.doesNotThrow(() => {
-		Service.fromOpts({ name: 'Foo-Bar', type: 'http', port: 65535 });
+		new Service({ name: 'Foo-Bar', type: 'http', port: 65535 });
 	}, 'Valid port given');
 	t.end();
 });
 
 test('excessive port', (t) => {
 	t.throws(() => {
-		Service.fromOpts({ name: 'Foo-Bar', type: 'http', port: 65536 });
+		new Service({ name: 'Foo-Bar', type: 'http', port: 65536 });
 	}, 'Invalid port given');
 	t.end();
 });
 
 test('minimal', (t) => {
-	let s = Service.fromOpts({ name: 'Foo-Bar', type: 'http', port: 3000 });
+	let s = new Service({ name: 'Foo-Bar', type: 'http', port: 3000 });
 	t.equal(s.name, 'Foo-Bar');
 	t.equal(s.protocol, 'tcp');
 	t.equal(s.type, 'http');
@@ -194,25 +194,25 @@ test('minimal', (t) => {
 });
 
 test('protocol', (t) => {
-	let s = Service.fromOpts({ name: 'Foo-Bar', type: 'http', port: 3000, protocol: 'udp' });
+	let s = new Service({ name: 'Foo-Bar', type: 'http', port: 3000, protocol: 'udp' });
 	t.deepEqual(s.protocol, 'udp');
 	t.end();
 });
 
 test('host', (t) => {
-	let s = Service.fromOpts({ name: 'Foo-Bar', type: 'http', port: 3000, host: 'example.com' });
+	let s = new Service({ name: 'Foo-Bar', type: 'http', port: 3000, host: 'example.com' });
 	t.deepEqual(s.host, 'example.com.local');
 	t.end();
 });
 
 test('txt', (t) => {
-	let s = Service.fromOpts({ name: 'Foo-Bar', type: 'http', port: 3000, txt: { foo: 'bar' } });
+	let s = new Service({ name: 'Foo-Bar', type: 'http', port: 3000, txt: { foo: 'bar' } });
 	t.deepEqual(s.txt, { foo: 'bar' });
 	t.end();
 });
 
 test('_records() - minimal', (t) => {
-	let s = Service.fromOpts({ name: 'Foo-Bar', type: 'http', protocol: 'tcp', port: 3000 });
+	let s = new Service({ name: 'Foo-Bar', type: 'http', protocol: 'tcp', port: 3000 });
 	t.deepEqual(s._records(), [
 		{ data: '_http._tcp.local', name: '_services._dns-sd._udp.local', ttl: 28800, type: 'PTR' },
 		{ data: s.fqdn, name: '_http._tcp.local', ttl: 28800, type: 'PTR' },
@@ -223,7 +223,7 @@ test('_records() - minimal', (t) => {
 });
 
 test('_records() - everything', (t) => {
-	let s = Service.fromOpts({ name: 'Foo-Bar', type: 'http', protocol: 'tcp', port: 3000, host: 'example.com', txt: { foo: 'bar' } });
+	let s = new Service({ name: 'Foo-Bar', type: 'http', protocol: 'tcp', port: 3000, host: 'example.com', txt: { foo: 'bar' } });
 	t.deepEqual(s._records(), [
 		{ data: '_http._tcp.local', name: '_services._dns-sd._udp.local', ttl: 28800, type: 'PTR' },
 		{ data: s.fqdn, name: '_http._tcp.local', ttl: 28800, type: 'PTR' },
