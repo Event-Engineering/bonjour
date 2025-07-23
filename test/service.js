@@ -181,12 +181,14 @@ test('minimal', (t) => {
 	let s = new Service({ name: 'Foo-Bar', type: 'http', port: 3000 });
 	t.equal(s.name, 'Foo-Bar');
 	t.equal(s.protocol, 'tcp');
-	t.equal(s.type, '_http._tcp');
+	t.equal(s.type, 'http');
+	t.equal(s.protocol, 'tcp');
 	t.equal(s.host, os.hostname() + '.local');
 	t.equal(s.port, 3000);
+	t.equal(s.dn, '_http._tcp.local');
 	t.equal(s.fqdn, 'Foo-Bar._http._tcp.local');
-	t.equal(s.txt, null);
-	t.equal(s.subtypes, null);
+	t.equal(s.txt, undefined);
+	t.equal(s.subtypes, undefined);
 	t.equal(s.published, false);
 	t.end();
 });
