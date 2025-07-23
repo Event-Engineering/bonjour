@@ -38,7 +38,7 @@ function test(name, fn) {
 }
 
 test('bonjour.publish', (bonjour, t) => {
-	let service = bonjour.publish({ name: 'foo', type: 'bar', port: 3000 });
+	let service = bonjour.publishService({ name: 'foo', type: 'bar', port: 3000 });
 	t.ok(service instanceof Service);
 	t.equal(service.published, false);
 	service.on('up', () => {
@@ -50,7 +50,7 @@ test('bonjour.publish', (bonjour, t) => {
 
 test('bonjour.unpublishAll', (bonjour, t) => {
 	t.test('published services', (t) => {
-		let service = bonjour.publish({ name: 'foo', type: 'bar', port: 3000 });
+		let service = bonjour.publishService({ name: 'foo', type: 'bar', port: 3000 });
 		service.on('up', () => {
 			bonjour.unpublishAll((err) => {
 				t.error(err);
@@ -109,9 +109,9 @@ test('bonjour.find', (bonjour, t) => {
 		});
 	});
 
-	bonjour.publish({ name: 'Foo-Bar', type: 'test', port: 3000 }).on('up', next());
-	bonjour.publish({ name: 'Invalid', type: 'test2', port: 3000 }).on('up', next());
-	bonjour.publish({ name: 'Baz', type: 'test', port: 3000, txt: { foo: 'bar' } }).on('up', next());
+	bonjour.publishService({ name: 'Foo-Bar', type: 'test', port: 3000 }).on('up', next());
+	bonjour.publishService({ name: 'Invalid', type: 'test2', port: 3000 }).on('up', next());
+	bonjour.publishService({ name: 'Baz', type: 'test', port: 3000, txt: { foo: 'bar' } }).on('up', next());
 });
 
 test('bonjour.find - binary txt', (bonjour, t) => {
@@ -127,11 +127,11 @@ test('bonjour.find - binary txt', (bonjour, t) => {
 		});
 	});
 
-	bonjour.publish({ name: 'Foo', type: 'test', port: 3000, txt: { bar: Buffer.from('buz') } }).on('up', next());
+	bonjour.publishService({ name: 'Foo', type: 'test', port: 3000, txt: { bar: Buffer.from('buz') } }).on('up', next());
 });
 
 test('bonjour.find - down event', (bonjour, t) => {
-	let service = bonjour.publish({ name: 'Foo-Bar', type: 'test', port: 3000 });
+	let service = bonjour.publishService({ name: 'Foo-Bar', type: 'test', port: 3000 });
 
 	service.on('up', () => {
 		let browser = bonjour.find({ type: 'test' });
@@ -158,8 +158,8 @@ test('bonjour.findOne - callback', (bonjour, t) => {
 		});
 	});
 
-	bonjour.publish({ name: 'Invalid', type: 'test2', port: 3000 }).on('up', next());
-	bonjour.publish({ name: 'Callback', type: 'test', port: 3000 }).on('up', next());
+	bonjour.publishService({ name: 'Invalid', type: 'test2', port: 3000 }).on('up', next());
+	bonjour.publishService({ name: 'Callback', type: 'test', port: 3000 }).on('up', next());
 });
 
 test('bonjour.findOne - emitter', (bonjour, t) => {
@@ -172,6 +172,6 @@ test('bonjour.findOne - emitter', (bonjour, t) => {
 		});
 	});
 
-	bonjour.publish({ name: 'Emitter', type: 'test', port: 3000 }).on('up', next());
-	bonjour.publish({ name: 'Invalid', type: 'test2', port: 3000 }).on('up', next());
+	bonjour.publishService({ name: 'Emitter', type: 'test', port: 3000 }).on('up', next());
+	bonjour.publishService({ name: 'Invalid', type: 'test2', port: 3000 }).on('up', next());
 });

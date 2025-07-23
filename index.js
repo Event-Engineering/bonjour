@@ -2,6 +2,7 @@ import Registry from './lib/registry.js';
 import Server from './lib/mdns-server.js';
 import Browser from './lib/browser.js';
 export {default as Service} from './lib/service.js';
+export {default as Address} from './lib/address.js';
 export {Registry, Server, Browser};
 
 export default class Bonjour {
@@ -13,8 +14,12 @@ export default class Bonjour {
 		this.#registry = new Registry(this.#server);
 	}
 
-	publish(opts) {
-		return this.#registry.publish(opts);
+	publishService(opts) {
+		return this.#registry.publishService(opts);
+	}
+
+	publishAddress(opts) {
+		return this.#registry.publishAddress(opts);
 	}
 
 	unpublishAll(cb) {
