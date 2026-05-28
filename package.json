@@ -15,7 +15,7 @@
 		"tape": "^4.5.1"
 	},
 	"scripts": {
-		"lint": "eslint --ext .js,.mjs,.cjs .",
+		"lint": "eslint .",
 		"test": "tape test/*.js"
 	},
 	"repository": {
