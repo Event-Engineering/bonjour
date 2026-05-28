@@ -17,7 +17,9 @@ b.find({type: 'qlab', protocol: 'udp', txt: {binary: true}}, (service) => {
 			setTimeout(() => {
 				console.debug('What have we here?', {functionName, value});
 			});
-		} catch (e) {}
+		} catch (e) {
+			console.warn('We encountered an error', e);
+		}
 	});
 }, (service) => {
 	console.debug('Down', service);
