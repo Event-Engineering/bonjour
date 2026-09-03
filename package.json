@@ -9,13 +9,16 @@
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",
+		"@stylistic/eslint-plugin": "^5.10.0",
 		"after-all": "^2.0.2",
 		"eslint": "^10.3.0",
 		"globals": "^17.6.0",
 		"tape": "^4.5.1"
 	},
 	"scripts": {
+		"start": "node .",
 		"lint": "eslint .",
+		"lint:fix": "eslint . --fix",
 		"test": "tape test/*.js"
 	},
 	"repository": {

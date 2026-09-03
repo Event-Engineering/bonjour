@@ -1,6 +1,7 @@
 import path from 'path';
 import js from '@eslint/js';
 import globals from 'globals';
+import stylistic from '@stylistic/eslint-plugin';
 
 // eslint-plugin-filename-rules uses context.getFilename() which was removed in ESLint 10.
 // Inline a compatible replacement.
@@ -37,6 +38,7 @@ export default [
 		ignores: [ 'node_modules/**' ],
 	},
 	js.configs.recommended,
+	stylistic.configs.customize({ indent: 'tab', quotes: 'single', semi: true, jsx: true }),
 	{
 		files: [ '**/*.{js,mjs,cjs,vue}' ],
 		languageOptions: {
@@ -51,12 +53,31 @@ export default [
 			'filename-rules': filenamePlugin,
 		},
 		rules: {
-			'curly': 'error',
+			curly: 'error',
 			'no-empty': [ 'error', { allowEmptyCatch: true }],
 			'no-fallthrough': 'off',
 			'no-inner-declarations': 'off',
 			'no-prototype-builtins': 'off',
 			'no-unused-vars': [ 'warn', { vars: 'all', args: 'none', ignoreRestSiblings: false }],
+			'@stylistic/array-bracket-newline': [ 'error', 'consistent' ],
+			'@stylistic/array-bracket-spacing': [ 'error', 'always', { objectsInArrays: false, arraysInArrays: false }],
+			'@stylistic/array-element-newline': [ 'error', { consistent: true }],
+			'@stylistic/brace-style': [ 'error', '1tbs' ],
+			'@stylistic/comma-dangle': [ 'error', { arrays: 'always-multiline', objects: 'always-multiline', imports: 'always-multiline', exports: 'always-multiline', functions: 'never' }],
+			'@stylistic/curly-newline': [ 'error', { minElements: 1, multiline: true }],
+			'@stylistic/function-call-argument-newline': [ 'warn', 'consistent' ],
+			'@stylistic/indent': [ 'error', 'tab', { VariableDeclarator: 0, SwitchCase: 1, MemberExpression: 0, ignoredNodes: [ 'ConditionalExpression' ]}],
+			'@stylistic/multiline-ternary': 'off',
+			'@stylistic/object-curly-newline': [ 'error', { ObjectExpression: { consistent: true }, ObjectPattern: { consistent: true }, ImportDeclaration: 'never', ExportDeclaration: 'never' }],
+			'@stylistic/object-curly-spacing': [ 'error', 'always', { objectsInObjects: false, arraysInObjects: false }],
+			'@stylistic/object-property-newline': [ 'error', { allowAllPropertiesOnSameLine: true }],
+			'@stylistic/quote-props': [ 'error', 'as-needed' ],
+			'@stylistic/semi': 'error',
+			'@stylistic/space-before-blocks': 'error',
+			'@stylistic/space-before-function-paren': [ 'error', { anonymous: 'never', named: 'never', asyncArrow: 'never' }],
+			'@stylistic/space-in-parens': [ 'error', 'never' ],
+			'@stylistic/space-infix-ops': 'error',
+			'@stylistic/space-unary-ops': [ 'error', { words: true, nonwords: true, overrides: { '++': false, '--': false, 'ts-non-null': true }}],
 			'filename-rules/match': [ 2, { pattern: /^\.?([a-z]+-)*[a-z]+(?:\..*)?$/ }],
 		},
 	},
