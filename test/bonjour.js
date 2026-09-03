@@ -2,7 +2,7 @@ import os from 'os';
 import dgram from 'dgram';
 import tape from 'tape';
 import afterAll from 'after-all';
-import {default as Bonjour, Service} from '../index.js';
+import { default as Bonjour, Service } from '../index.js';
 
 function getAddresses() {
 	let addresses = [];
@@ -79,12 +79,12 @@ test('bonjour.find', (bonjour, t) => {
 				t.equal(s.name, 'Foo-Bar');
 				t.equal(s.fqdn, 'Foo-Bar._test._tcp.local');
 				t.deepEqual(s.txt, [{}]);
-				t.deepEqual(s.rawTxt, [Buffer.from('00', 'hex')]);
+				t.deepEqual(s.rawTxt, [ Buffer.from('00', 'hex') ]);
 			} else {
 				t.equal(s.name, 'Baz');
 				t.equal(s.fqdn, 'Baz._test._tcp.local');
 				t.deepEqual(s.txt, [{ foo: 'bar' }]);
-				t.deepEqual(s.rawTxt, [Buffer.from('07666f6f3d626172', 'hex')]);
+				t.deepEqual(s.rawTxt, [ Buffer.from('07666f6f3d626172', 'hex') ]);
 			}
 
 			t.equal(s.host, os.hostname() + '.local');
@@ -111,23 +111,23 @@ test('bonjour.find', (bonjour, t) => {
 
 	bonjour.publishService({ name: 'Foo-Bar', type: 'test', port: 3000 }).on('up', next());
 	bonjour.publishService({ name: 'Invalid', type: 'test2', port: 3000 }).on('up', next());
-	bonjour.publishService({ name: 'Baz', type: 'test', port: 3000, txt: { foo: 'bar' } }).on('up', next());
+	bonjour.publishService({ name: 'Baz', type: 'test', port: 3000, txt: { foo: 'bar' }}).on('up', next());
 });
 
 test('bonjour.find - binary txt', (bonjour, t) => {
 	let next = afterAll(() => {
-		let browser = bonjour.find({ type: 'test', txt: { binary: true } });
+		let browser = bonjour.find({ type: 'test', txt: { binary: true }});
 
 		browser.on('up', (s) => {
 			t.equal(s.name, 'Foo');
 			t.deepEqual(s.txt, [{ bar: Buffer.from('buz') }]);
-			t.deepEqual(s.rawTxt, [Buffer.from('076261723d62757a', 'hex')]);
+			t.deepEqual(s.rawTxt, [ Buffer.from('076261723d62757a', 'hex') ]);
 			bonjour.destroy();
 			t.end();
 		});
 	});
 
-	bonjour.publishService({ name: 'Foo', type: 'test', port: 3000, txt: { bar: Buffer.from('buz') } }).on('up', next());
+	bonjour.publishService({ name: 'Foo', type: 'test', port: 3000, txt: { bar: Buffer.from('buz') }}).on('up', next());
 });
 
 test('bonjour.find - down event', (bonjour, t) => {

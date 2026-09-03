@@ -1,9 +1,9 @@
 import Registry from './lib/registry.js';
 import Server from './lib/mdns-server.js';
 import Browser from './lib/browser.js';
-export {default as Service} from './lib/service.js';
-export {default as Address} from './lib/address.js';
-export {Registry, Server, Browser};
+export { default as Service } from './lib/service.js';
+export { default as Address } from './lib/address.js';
+export { Registry, Server, Browser };
 
 export default class Bonjour {
 	#server;
@@ -32,7 +32,7 @@ export default class Bonjour {
 
 	findOne(opts, cb) {
 		let browser = new Browser(this.#server.mdns, opts);
-		browser.once('up', function (service) {
+		browser.once('up', function(service) {
 			browser.stop();
 			if (cb) {
 				cb(service);

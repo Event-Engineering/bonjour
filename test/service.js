@@ -1,6 +1,6 @@
 import os from 'os';
 import test from 'tape';
-import {Service} from '../index.js';
+import { Service } from '../index.js';
 
 function getAddressesRecords(host) {
 	let records = [];
@@ -151,7 +151,7 @@ test('no port', (t) => {
 
 test('negative port', (t) => {
 	t.throws(() => {
-		new Service({ name: 'Foo-Bar', type: 'http', port: -1 });
+		new Service({ name: 'Foo-Bar', type: 'http', port: - 1 });
 	}, 'Invalid port given');
 	t.end();
 });
@@ -206,7 +206,7 @@ test('host', (t) => {
 });
 
 test('txt', (t) => {
-	let s = new Service({ name: 'Foo-Bar', type: 'http', port: 3000, txt: { foo: 'bar' } });
+	let s = new Service({ name: 'Foo-Bar', type: 'http', port: 3000, txt: { foo: 'bar' }});
 	t.deepEqual(s.txt, { foo: 'bar' });
 	t.end();
 });
@@ -223,7 +223,7 @@ test('_records() - minimal', (t) => {
 });
 
 test('_records() - everything', (t) => {
-	let s = new Service({ name: 'Foo-Bar', type: 'http', protocol: 'tcp', port: 3000, host: 'example.com', txt: { foo: 'bar' } });
+	let s = new Service({ name: 'Foo-Bar', type: 'http', protocol: 'tcp', port: 3000, host: 'example.com', txt: { foo: 'bar' }});
 	t.deepEqual(s._records(), [
 		{ data: '_http._tcp.local', name: '_services._dns-sd._udp.local', ttl: 28800, type: 'PTR' },
 		{ data: s.fqdn, name: '_http._tcp.local', ttl: 28800, type: 'PTR' },

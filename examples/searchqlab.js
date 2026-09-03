@@ -4,7 +4,7 @@ let b = new Bonjour({});
 
 console.debug('Searching for QLab services');
 
-b.find({type: 'qlab', protocol: 'udp', txt: {binary: true}}, (service) => {
+b.find({ type: 'qlab', protocol: 'udp', txt: { binary: true }}, (service) => {
 	console.debug('Up', service);
 
 	let test = service.txt.version;
@@ -15,7 +15,7 @@ b.find({type: 'qlab', protocol: 'udp', txt: {binary: true}}, (service) => {
 		try {
 			let value = test[functionName]();
 			setTimeout(() => {
-				console.debug('What have we here?', {functionName, value});
+				console.debug('What have we here?', { functionName, value });
 			});
 		} catch (e) {
 			console.warn('We encountered an error', e);
