@@ -128,6 +128,23 @@ test('_records() - addresses set after construction', (t) => {
 	t.end();
 });
 
+test('_records() - non-IP addresses are filtered out', (t) => {
+	let warnings = [];
+	let warn = console.warn;
+	console.warn = message => warnings.push(message);
+
+	let s = new Address({ name: 'Foo-Bar', addresses: [ '192.168.1.1', 'not-an-ip', '' ]});
+	let records = s._records();
+
+	console.warn = warn;
+
+	t.deepEqual(records, [
+		{ data: '192.168.1.1', name: 'Foo-Bar.local', ttl: 120, type: 'A' },
+	]);
+	t.equal(warnings.length, 2, 'One warning per rejected address');
+	t.end();
+});
+
 test('_records() - empty addresses falls back to the interfaces', (t) => {
 	let s = new Address({ name: 'Foo-Bar', addresses: []});
 	t.deepEqual(s._records(), getAddressesRecords('Foo-Bar.local'));
