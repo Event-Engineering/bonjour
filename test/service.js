@@ -208,6 +208,69 @@ test('host', (t) => {
 test('txt', (t) => {
 	let s = new Service({ name: 'Foo-Bar', type: 'http', port: 3000, txt: { foo: 'bar' }});
 	t.deepEqual(s.txt, { foo: 'bar' });
+	t.deepEqual(s.rawTxt, [ Buffer.from('foo=bar') ], 'Encoded as one bare pair');
+	t.end();
+});
+
+test('txt - valueless attributes', (t) => {
+	let s = new Service({ name: 'Foo-Bar', type: 'http', port: 3000, txt: { secure: true }});
+	t.deepEqual(s.rawTxt, [ Buffer.from('secure') ], 'Written without an equals sign');
+	t.deepEqual(s.txt, { secure: true }, 'Read back as true');
+	t.end();
+});
+
+test('txt - changed in place', (t) => {
+	let s = new Service({ name: 'Foo-Bar', type: 'http', port: 3000, txt: { foo: 'bar' }});
+
+	s.txt.foo = 'baz';
+	t.deepEqual(s.rawTxt, [ Buffer.from('foo=baz') ], 'Assigning a pair re-encodes the record');
+
+	delete s.txt.foo;
+	t.deepEqual(s.rawTxt, [ Buffer.alloc(0) ], 'Emptying it keeps the one empty character-string');
+	t.end();
+});
+
+test('txt - a replaced txt no longer drives the record', (t) => {
+	let s = new Service({ name: 'Foo-Bar', type: 'http', port: 3000, txt: { foo: 'bar' }});
+	let stale = s.txt;
+
+	s.txt = { replaced: 'yes' };
+	stale.foo = 'changed';
+
+	t.deepEqual(s.txt, { replaced: 'yes' }, 'The current txt is untouched');
+	t.deepEqual(s.rawTxt, [ Buffer.from('replaced=yes') ], 'And the record still matches it');
+	t.end();
+});
+
+test('txtObj - a replaced txtObj no longer drives the record', (t) => {
+	let s = new Service({ name: 'Foo-Bar', type: 'http', port: 3000, txt: { foo: 'bar' }});
+	let stale = s.txtObj;
+
+	s.txtObj = { replaced: 'yes' };
+	delete stale.foo;
+
+	t.deepEqual(s.txtObj, { replaced: 'yes' }, 'The current txtObj is untouched');
+	t.deepEqual(s.rawTxt, [ Buffer.from('replaced=yes') ], 'And the record still matches it');
+	t.end();
+});
+
+test('txt - a pair may not exceed 255 bytes', (t) => {
+	t.doesNotThrow(() => {
+		new Service({ name: 'Foo-Bar', type: 'http', port: 3000, txt: { key: 'x'.repeat(251) }});
+	}, 'The longest allowed pair');
+	t.throws(() => {
+		new Service({ name: 'Foo-Bar', type: 'http', port: 3000, txt: { key: 'x'.repeat(252) }});
+	}, 'One byte too far');
+	t.end();
+});
+
+test('rawTxt - pairs we cannot use are skipped, not fatal', (t) => {
+	let raw = [ Buffer.from('=nokey'), Buffer.from('foo=bar'), Buffer.from('foo=second'), Buffer.from('secure') ];
+	let s = new Service({ name: 'Foo-Bar', type: 'http', port: 3000 });
+	s.rawTxt = raw;
+
+	t.deepEqual(s.txt, { foo: 'bar', secure: true }, 'Zero-length key dropped, repeated key keeps the first');
+	t.deepEqual(s.rawTxt, raw, 'The record itself is preserved as it arrived');
 	t.end();
 });
 
@@ -217,7 +280,7 @@ test('_records() - minimal', (t) => {
 		{ data: '_http._tcp.local', name: '_services._dns-sd._udp.local', ttl: 4500, type: 'PTR' },
 		{ data: s.fqdn, name: '_http._tcp.local', ttl: 4500, type: 'PTR' },
 		{ data: { port: 3000, target: os.hostname() + '.local' }, name: s.fqdn, ttl: 120, type: 'SRV' },
-		{ data: Buffer.from('00', 'hex'), name: s.fqdn, ttl: 4500, type: 'TXT' },
+		{ data: [ Buffer.alloc(0) ], name: s.fqdn, ttl: 4500, type: 'TXT' },
 	].concat(getAddressesRecords(s.host)));
 	t.end();
 });
@@ -228,7 +291,7 @@ test('_records() - everything', (t) => {
 		{ data: '_http._tcp.local', name: '_services._dns-sd._udp.local', ttl: 4500, type: 'PTR' },
 		{ data: s.fqdn, name: '_http._tcp.local', ttl: 4500, type: 'PTR' },
 		{ data: { port: 3000, target: 'example.com' + '.local' }, name: s.fqdn, ttl: 120, type: 'SRV' },
-		{ data: Buffer.from('07666f6f3d626172', 'hex'), name: s.fqdn, ttl: 4500, type: 'TXT' },
+		{ data: [ Buffer.from('foo=bar') ], name: s.fqdn, ttl: 4500, type: 'TXT' },
 	].concat(getAddressesRecords(s.host)));
 	t.end();
 });
