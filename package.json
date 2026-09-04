@@ -3,7 +3,18 @@
 	"version": "5.0.0-alpha",
 	"description": "A Bonjour/Zeroconf implementation in pure JavaScript",
 	"main": "index.js",
+	"exports": {
+		".": "./index.js",
+		"./package.json": "./package.json"
+	},
 	"type": "module",
+	"files": [
+		"index.js",
+		"lib"
+	],
+	"engines": {
+		"node": ">=22"
+	},
 	"dependencies": {
 		"multicast-dns": "^7.2.5"
 	},
