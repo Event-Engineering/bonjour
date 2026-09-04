@@ -255,15 +255,15 @@ The fully qualified domain name of the service. E.g. if given the name `foo-bar`
 
 #### `service.txt`
 
-The TXT records advertised by the service. On a discovered service this is an array of key/value objects, one per TXT record. On a service you built yourself it is whatever you passed to the constructor. See [TXT records](#txt-records).
+The service's TXT record as a flat key/value object, however the service was built. Changing it in place — `service.txt.path = '/v2'` — re-encodes the record and re-announces it, as does assigning a new object. See [TXT records](#txt-records).
 
 #### `service.txtObj`
 
-For a discovered service, all of its TXT records merged into a single key/value object. This is usually the property you want when reading TXT data. `undefined` on a service built from constructor options.
+An alias of [`service.txt`](#servicetxt), kept for compatibility.
 
 #### `service.rawTxt`
 
-For a discovered service, its TXT records as an array of encoded buffers. `undefined` on a service built from constructor options.
+The same record in its encoded form: an array of buffers, one per `key=value` pair. This is what goes on the wire, and on a discovered service it is exactly what arrived — including any pair that could not be decoded.
 
 #### `service.addresses`
 
@@ -331,29 +331,42 @@ A plain object representation of the address, suitable for serialisation.
 
 ## TXT records
 
-When publishing, pass the TXT record as a single key/value object at construction time:
+A service has one TXT record, holding a flat set of key/value pairs (RFC-6763 section 6). Pass it as a plain object:
 
 ```js
 bonjour.publishService({ name: 'my-web', type: 'http', port: 3000, txt: { path: '/' } });
 ```
 
-A responder on the network may advertise several TXT records, so a *discovered* service exposes them as an array of key/value objects in `service.txt`, with the matching encoded buffers in `service.rawTxt`. `service.txtObj` flattens them all into a single object, which is usually what you want when reading a discovered service:
+`service.txt` reads back the same way, whether you built the service or found it:
 
 ```js
 bonjour.find({ type: 'http' }, (service) => {
-	console.log(service.txtObj); // { path: '/', version: '2' }
+	console.log(service.txt); // { path: '/', version: '2' }
 });
 ```
 
-TXT values are decoded to strings by default. Pass `{ binary: true }` to keep them as buffers — as `txtSettings` when publishing, or as `txt` when browsing:
+It can be changed in place, which re-encodes the record and announces it again:
+
+```js
+service.txt.path = '/v2';
+delete service.txt.version;
+```
+
+A key with no value is a valueless attribute — written without an `=`, and read back as `true`:
+
+```js
+bonjour.publishService({ name: 'my-web', type: 'http', port: 3000, txt: { secure: true } }); // "secure"
+```
+
+Values are decoded to strings by default. Pass `{ binary: true }` to keep them as buffers — as `txtSettings` when publishing, or as `txt` when browsing:
 
 ```js
 bonjour.find({ type: 'qlab', protocol: 'udp', txt: { binary: true } }, (service) => {
-	console.log(service.txtObj.version); // <Buffer ...>
+	console.log(service.txt.version); // <Buffer ...>
 });
 ```
 
-Records that are not RFC-6763 compliant are decoded as RFC-1464.
+[`service.rawTxt`](#servicerawtxt) holds the encoded form, one buffer per pair. A pair must encode to 255 bytes or fewer and encoding throws if one does not, that being the longest character-string DNS can carry. Pairs that cannot be used — a key with no name, or a repeat of one already seen — are skipped while decoding rather than costing you the rest of the record, and are left untouched in `rawTxt`.
 
 ## Lower level API
 
@@ -379,7 +392,8 @@ registry.publishService({ name: 'my-web', type: 'http', port: 3000 });
 - **ESM only, Node 22+.** `require()` is no longer supported.
 - **`bonjour.publish()` is now `bonjour.publishService()`.** The options are otherwise unchanged.
 - **`subtypes` has been removed** from both publishing and browsing, along with `service.subtypes`.
-- **A discovered `service.txt` is now an array of key/value objects** rather than a single object, since a responder may advertise more than one TXT record. Use [`service.txtObj`](#servicetxtobj) for the previous behaviour. Publishing still takes a single object.
+- **`service.txt` is a flat key/value object**, as it was in 4.x, and now reads back the same whether the service was built or discovered. It may also be changed in place. `service.txtObj` is an alias of it, and `service.rawTxt` holds the encoded pairs.
+- **TXT records on the wire are fixed.** 4.x length-prefixed each pair itself and then handed the result to dns-packet, which prefixed it again — so the records it published could not be read by other implementations. That framing is now left to dns-packet alone.
 - **TXT decoder settings moved.** When publishing, pass `txtSettings` instead of `txt` for encoder options; `txt` is now the record itself. Browsing still takes `txt`.
 - **`Service` is now a validating model.** Bad names, types and ports throw from the constructor rather than being published as-is — note the 15 character limit, which rules out names like `Apple TV` that 4.x accepted.
 - **New:** [`bonjour.publishAddress()`](#const-address--bonjourpublishaddressoptions) for advertising a hostname on its own, the [`probe`](#publishing) option, `service.txtObj`, `service.rawTxt`, `browser.servicesExport`, and the `Service`, `Address`, `Browser`, `Registry` and `Server` exports.
