@@ -175,3 +175,47 @@ test('bonjour.findOne - emitter', (bonjour, t) => {
 	bonjour.publishService({ name: 'Emitter', type: 'test', port: 3000 }).on('up', next());
 	bonjour.publishService({ name: 'Invalid', type: 'test2', port: 3000 }).on('up', next());
 });
+
+test('bonjour.publishAddress - announcements carry the cache-flush bit', (bonjour, t) => {
+	let address = bonjour.publishAddress({ name: 'foo-bar', addresses: [ '192.168.1.1' ]});
+
+	address.on('anouncing', (records) => {
+		t.deepEqual(records.map(r => r.data), [ '192.168.1.1' ], 'Announces the given address');
+		t.deepEqual(records.map(r => r.flush), [ true ], 'A records are flushed');
+		bonjour.destroy();
+		t.end();
+	});
+});
+
+test('bonjour.publishAddress - re-announces when the addresses change', (bonjour, t) => {
+	let address = bonjour.publishAddress({ name: 'foo-bar', addresses: [ '192.168.1.1' ]});
+
+	address.on('up', () => {
+		address.once('anouncing', (records) => {
+			t.deepEqual(records.map(r => r.data), [ '10.0.0.1' ], 'Re-announces the new address');
+			bonjour.destroy();
+			t.end();
+		});
+
+		address.addresses = [ '10.0.0.1' ];
+	});
+});
+
+test('bonjour.publishAddress - several changes cost one announcement', (bonjour, t) => {
+	let address = bonjour.publishAddress({ name: 'foo-bar', addresses: [ '192.168.1.1' ]});
+
+	address.on('up', () => {
+		let announcements = 0;
+		address.on('anouncing', () => announcements++);
+
+		address.addresses = [ '10.0.0.1' ];
+		address.addresses = [ '10.0.0.2' ];
+		address.addresses = [ '10.0.0.3' ];
+
+		setTimeout(() => {
+			t.equal(announcements, 1, 'Coalesced into a single re-announcement');
+			bonjour.destroy();
+			t.end();
+		}, 500);
+	});
+});

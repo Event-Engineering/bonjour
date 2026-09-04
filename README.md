@@ -311,7 +311,15 @@ The domain the hostname is published in, e.g. `local`.
 
 #### `address.addresses`
 
-The IP addresses advertised for this hostname, as an array. When empty, the host's own external network interfaces are used instead. Assigning to it replaces the list, and the change is picked up by the next announcement.
+The IP addresses advertised for this hostname, as an array. When empty, the host's own external network interfaces are used instead. Entries that are not valid IP addresses are skipped with a warning.
+
+Assigning to it replaces the list and re-announces the address: records that have gone away are sent as goodbyes, and the new set is announced afresh. Several assignments in a row are coalesced into a single announcement.
+
+```js
+const address = bonjour.publishAddress({ name: 'my-nas', addresses: [ '192.168.1.10' ]});
+
+address.addresses = [ '192.168.1.11' ]; // goodbye .10, announce .11
+```
 
 #### `address.published`
 
