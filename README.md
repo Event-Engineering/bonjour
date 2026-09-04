@@ -110,7 +110,7 @@ stateDiagram-v2
 	Probing --> Conflict : name already in use
 	Conflict --> [*] : error event
 	Announcing --> Published : up event
-	Published --> Published : reannounce after 3s, 9s, 27s, up to 1h
+	Published --> Published : announced again after 3s and 9s
 	Published --> Goodbye : stop or unpublishAll
 	Goodbye --> [*] : records resent with TTL 0
 ```

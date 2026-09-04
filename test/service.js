@@ -214,8 +214,8 @@ test('txt', (t) => {
 test('_records() - minimal', (t) => {
 	let s = new Service({ name: 'Foo-Bar', type: 'http', protocol: 'tcp', port: 3000 });
 	t.deepEqual(s._records(), [
-		{ data: '_http._tcp.local', name: '_services._dns-sd._udp.local', ttl: 28800, type: 'PTR' },
-		{ data: s.fqdn, name: '_http._tcp.local', ttl: 28800, type: 'PTR' },
+		{ data: '_http._tcp.local', name: '_services._dns-sd._udp.local', ttl: 4500, type: 'PTR' },
+		{ data: s.fqdn, name: '_http._tcp.local', ttl: 4500, type: 'PTR' },
 		{ data: { port: 3000, target: os.hostname() + '.local' }, name: s.fqdn, ttl: 120, type: 'SRV' },
 		{ data: Buffer.from('00', 'hex'), name: s.fqdn, ttl: 4500, type: 'TXT' },
 	].concat(getAddressesRecords(s.host)));
@@ -225,8 +225,8 @@ test('_records() - minimal', (t) => {
 test('_records() - everything', (t) => {
 	let s = new Service({ name: 'Foo-Bar', type: 'http', protocol: 'tcp', port: 3000, host: 'example.com', txt: { foo: 'bar' }});
 	t.deepEqual(s._records(), [
-		{ data: '_http._tcp.local', name: '_services._dns-sd._udp.local', ttl: 28800, type: 'PTR' },
-		{ data: s.fqdn, name: '_http._tcp.local', ttl: 28800, type: 'PTR' },
+		{ data: '_http._tcp.local', name: '_services._dns-sd._udp.local', ttl: 4500, type: 'PTR' },
+		{ data: s.fqdn, name: '_http._tcp.local', ttl: 4500, type: 'PTR' },
 		{ data: { port: 3000, target: 'example.com' + '.local' }, name: s.fqdn, ttl: 120, type: 'SRV' },
 		{ data: Buffer.from('07666f6f3d626172', 'hex'), name: s.fqdn, ttl: 4500, type: 'TXT' },
 	].concat(getAddressesRecords(s.host)));
