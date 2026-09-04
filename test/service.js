@@ -255,21 +255,53 @@ test('txtObj - a replaced txtObj no longer drives the record', (t) => {
 });
 
 test('txt - a pair may not exceed 255 bytes', (t) => {
-	t.doesNotThrow(() => {
-		new Service({ name: 'Foo-Bar', type: 'http', port: 3000, txt: { key: 'x'.repeat(251) }});
-	}, 'The longest allowed pair');
+	let warnings = [];
+	let warn = console.warn;
+	console.warn = message => warnings.push(message);
+
+	let longest = new Service({ name: 'Foo-Bar', type: 'http', port: 3000, txt: { key: 'x'.repeat(251), keep: 'me' }});
+	let toolong = new Service({ name: 'Foo-Bar', type: 'http', port: 3000, txt: { key: 'x'.repeat(252), keep: 'me' }});
+
+	console.warn = warn;
+
+	t.equal(longest.rawTxt.length, 2, 'The longest allowed pair is carried');
+	t.deepEqual(Object.keys(toolong.txt), [ 'key', 'keep' ], 'One byte too far is still yours to keep');
+	t.equal(toolong.rawTxt.length, 1, 'But is left out of the record, which carries the rest');
+	t.equal(warnings.length, 1, 'And is warned about');
+	t.end();
+});
+
+test('_freeze() - a found service is not ours to change', (t) => {
+	let s = new Service({ name: 'Foo-Bar', type: 'http', port: 3000, txt: { foo: 'bar' }});
+	let held = s.txt;
+
+	s._freeze();
+
 	t.throws(() => {
-		new Service({ name: 'Foo-Bar', type: 'http', port: 3000, txt: { key: 'x'.repeat(252) }});
-	}, 'One byte too far');
+		s.txt.foo = 'baz';
+	}, 'Changing a pair throws');
+	t.throws(() => {
+		held.foo = 'baz';
+	}, 'Including through a reference taken beforehand');
+	t.deepEqual(s.rawTxt, [ Buffer.from('foo=bar') ], 'And the record is left alone');
 	t.end();
 });
 
 test('rawTxt - pairs we cannot use are skipped, not fatal', (t) => {
-	let raw = [ Buffer.from('=nokey'), Buffer.from('foo=bar'), Buffer.from('foo=second'), Buffer.from('secure') ];
+	let raw = [ Buffer.from('=nokey'), Buffer.from('bad\x01key=x'), Buffer.from('foo=bar'), Buffer.from('foo=second'), Buffer.from('secure') ];
 	let s = new Service({ name: 'Foo-Bar', type: 'http', port: 3000 });
-	s.rawTxt = raw;
 
-	t.deepEqual(s.txt, { foo: 'bar', secure: true }, 'Zero-length key dropped, repeated key keeps the first');
+	let warnings = [];
+	let warn = console.warn;
+	console.warn = message => warnings.push(message);
+
+	s.rawTxt = raw;
+	let txt = s.txt;
+
+	console.warn = warn;
+
+	t.deepEqual(txt, { foo: 'bar', secure: true }, 'Keyless and unprintable pairs dropped, a repeated key keeps the first');
+	t.equal(warnings.length, 2, 'One warning each for the two we could not read, none for the repeat');
 	t.deepEqual(s.rawTxt, raw, 'The record itself is preserved as it arrived');
 	t.end();
 });
