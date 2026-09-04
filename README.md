@@ -127,12 +127,14 @@ Options are:
 
 - `name` (string) — required. The hostname to advertise, between 2 and 255 characters. It may contain several `.` separated parts, each between 2 and 63 characters and matching `[a-z]([-a-z0-9]{0,61}[a-z0-9])?` (case insensitive). An invalid or missing name throws.
 - `domain` (string, optional) — defaults to `local`.
+- `addresses` (array of strings, optional) — the IP addresses to advertise. Each is published as an A or AAAA record according to whether it is IPv4 or IPv6. When omitted or empty, the host's own external network interfaces are used instead.
 
 ```js
-bonjour.publishAddress({ name: 'my-box' }); // advertises my-box.local
+bonjour.publishAddress({ name: 'my-box' });                                 // this host's own addresses
+bonjour.publishAddress({ name: 'my-nas', addresses: [ '192.168.1.10' ] });  // an address of your choosing
 ```
 
-The advertised A and AAAA records are derived from the host's own external network interfaces. Addresses are announced immediately — unlike services they are not probed for conflicts.
+Addresses are announced immediately — unlike services they are not probed for conflicts.
 
 #### `bonjour.unpublishAll([callback])`
 
@@ -309,7 +311,7 @@ The domain the hostname is published in, e.g. `local`.
 
 #### `address.addresses`
 
-An array of IP addresses. Note that this is informational only — the A and AAAA records that get advertised are always derived from the host's own external network interfaces, whatever this is set to.
+The IP addresses advertised for this hostname, as an array. When empty, the host's own external network interfaces are used instead. Assigning to it replaces the list, and the change is picked up by the next announcement.
 
 #### `address.published`
 
