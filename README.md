@@ -366,7 +366,9 @@ bonjour.find({ type: 'qlab', protocol: 'udp', txt: { binary: true } }, (service)
 });
 ```
 
-[`service.rawTxt`](#servicerawtxt) holds the encoded form, one buffer per pair. A pair must encode to 255 bytes or fewer and encoding throws if one does not, that being the longest character-string DNS can carry. Pairs that cannot be used — a key with no name, or a repeat of one already seen — are skipped while decoding rather than costing you the rest of the record, and are left untouched in `rawTxt`.
+[`service.rawTxt`](#servicerawtxt) holds the encoded form, one buffer per pair. Nothing is ever rejected outright: a pair that cannot go on the wire is reported with `console.warn` and left out of the record, while staying in `service.txt` for you to do as you like with. The two may therefore disagree, `txt` being what you asked to advertise and `rawTxt` what can be carried.
+
+A pair is left out when it encodes to more than 255 bytes, that being the longest character-string DNS can carry. Coming the other way, a pair is skipped when it has no key at all, or a key that is not printable US-ASCII; a key repeated within one record keeps its first value, silently, as the specification asks. Skipped pairs remain untouched in `rawTxt`, so a record you cannot fully read still goes back out exactly as it arrived.
 
 ## Lower level API
 
