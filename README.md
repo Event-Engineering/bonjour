@@ -86,6 +86,7 @@ Options are:
 - `type` (string) — required. Same restrictions as `name`.
 - `port` (number) — required. Between 0 and 65535.
 - `host` (string, optional) — defaults to the local hostname. The domain is appended if missing, so `foo` becomes `foo.local`.
+- `addresses` (array of strings, optional) — the IP addresses to advertise for `host`, each published as an A or AAAA record according to whether it is IPv4 or IPv6. When omitted or empty, the host's own external network interfaces are used instead. Entries that are not valid IP addresses are skipped with a warning.
 - `protocol` (string, optional) — `udp` or `tcp` (default).
 - `domain` (string, optional) — defaults to `local`.
 - `txt` (object, optional) — a key/value object to broadcast as the TXT record. See [TXT records](#txt-records).
@@ -257,17 +258,13 @@ The fully qualified domain name of the service. E.g. if given the name `foo-bar`
 
 The service's TXT record as a flat key/value object, however the service was built. Changing it in place — `service.txt.path = '/v2'` — re-encodes the record and re-announces it, as does assigning a new object. See [TXT records](#txt-records).
 
-#### `service.txtObj`
-
-An alias of [`service.txt`](#servicetxt), kept for compatibility.
-
 #### `service.rawTxt`
 
 The same record in its encoded form: an array of buffers, one per `key=value` pair. This is what goes on the wire, and on a discovered service it is exactly what arrived — including any pair that could not be decoded.
 
 #### `service.addresses`
 
-An array of IP addresses that the service's host resolves to.
+The IP addresses advertised for the service's host, as an array. On a service you publish, assigning to it replaces them and re-announces the service, exactly as [`address.addresses`](#addressaddresses) does; when empty the host's own external interfaces are used. On a discovered service it is the addresses that were found for it.
 
 #### `service.referer`
 
@@ -404,11 +401,11 @@ registry.publishService({ name: 'my-web', type: 'http', port: 3000 });
 - **ESM only, Node 22+.** `require()` is no longer supported.
 - **`bonjour.publish()` is now `bonjour.publishService()`.** The options are otherwise unchanged.
 - **`subtypes` has been removed** from both publishing and browsing, along with `service.subtypes`.
-- **`service.txt` is a flat key/value object**, as it was in 4.x, and now reads back the same whether the service was built or discovered. It may also be changed in place. `service.txtObj` is an alias of it, and `service.rawTxt` holds the encoded pairs.
+- **`service.txt` is a flat key/value object**, as it was in 4.x, and now reads back the same whether the service was built or discovered. It may also be changed in place, and `service.rawTxt` holds the encoded pairs.
 - **TXT records on the wire are fixed.** 4.x length-prefixed each pair itself and then handed the result to dns-packet, which prefixed it again — so the records it published could not be read by other implementations. That framing is now left to dns-packet alone.
 - **TXT decoder settings moved.** When publishing, pass `txtSettings` instead of `txt` for encoder options; `txt` is now the record itself. Browsing still takes `txt`.
 - **`Service` is now a validating model.** Bad names, types and ports throw from the constructor rather than being published as-is — note the 15 character limit, which rules out names like `Apple TV` that 4.x accepted.
-- **New:** [`bonjour.publishAddress()`](#const-address--bonjourpublishaddressoptions) for advertising a hostname on its own, the [`probe`](#publishing) option, `service.txtObj`, `service.rawTxt`, `browser.servicesExport`, and the `Service`, `Address`, `Browser`, `Registry` and `Server` exports.
+- **New:** [`bonjour.publishAddress()`](#const-address--bonjourpublishaddressoptions) for advertising a hostname on its own, the [`probe`](#publishing) option, `addresses` on a published service, `service.rawTxt`, `browser.servicesExport`, and the `Service`, `Address`, `Browser`, `Registry` and `Server` exports.
 
 ## License
 

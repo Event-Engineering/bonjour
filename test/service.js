@@ -295,15 +295,35 @@ test('txt - a replaced txt no longer drives the record', (t) => {
 	t.end();
 });
 
-test('txtObj - a replaced txtObj no longer drives the record', (t) => {
-	let s = new Service({ name: 'Foo-Bar', type: 'http', port: 3000, txt: { foo: 'bar' }});
-	let stale = s.txtObj;
+test('_records() - given addresses', (t) => {
+	let s = new Service({ name: 'Foo-Bar', type: 'http', port: 3000, addresses: [ '192.168.1.1', 'fe80::1' ]});
 
-	s.txtObj = { replaced: 'yes' };
-	delete stale.foo;
+	t.deepEqual(s._records().filter(r => r.type === 'A' || r.type === 'AAAA'), [
+		{ data: '192.168.1.1', name: s.host, ttl: 120, type: 'A' },
+		{ data: 'fe80::1', name: s.host, ttl: 120, type: 'AAAA' },
+	]);
+	t.end();
+});
 
-	t.deepEqual(s.txtObj, { replaced: 'yes' }, 'The current txtObj is untouched');
-	t.deepEqual(s.rawTxt, [ Buffer.from('replaced=yes') ], 'And the record still matches it');
+test('_records() - non-IP addresses are filtered out', (t) => {
+	let warnings = [];
+	let warn = console.warn;
+	console.warn = message => warnings.push(message);
+
+	let s = new Service({ name: 'Foo-Bar', type: 'http', port: 3000, addresses: [ '192.168.1.1', 'not-an-ip' ]});
+	let records = s._records().filter(r => r.type === 'A' || r.type === 'AAAA');
+
+	console.warn = warn;
+
+	t.deepEqual(records, [{ data: '192.168.1.1', name: s.host, ttl: 120, type: 'A' }]);
+	t.equal(warnings.length, 1, 'One warning for the address we could not use');
+	t.end();
+});
+
+test('_records() - no addresses falls back to the interfaces', (t) => {
+	let s = new Service({ name: 'Foo-Bar', type: 'http', port: 3000 });
+
+	t.deepEqual(s._records().filter(r => r.type === 'A' || r.type === 'AAAA'), getAddressesRecords(s.host));
 	t.end();
 });
 
