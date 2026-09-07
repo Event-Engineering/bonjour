@@ -392,6 +392,7 @@ registry.publishService({ name: 'my-web', type: 'http', port: 3000 });
 ```
 
 - `server.mdns` — the underlying multicast-dns instance.
+- `Event: error` — emitted when a query could not be answered, typically because the multicast send failed. Failing to answer costs that querier one answer and nothing else, so this is reported rather than thrown and is always warned about via `console.warn`; listening is optional.
 - `server.register(records)` / `server.unregister(records)` — manage the DNS records the server answers queries with.
 - `registry.publish(thing[, probe])` — publish a `Service` or `Address` instance directly.
 - `registry.publishService(options)` / `registry.publishAddress(options)` / `registry.unpublishAll([callback])` — as per the `Bonjour` methods of the same name.
