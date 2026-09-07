@@ -179,7 +179,7 @@ test('bonjour.findOne - emitter', (bonjour, t) => {
 test('bonjour.publishAddress - announcements carry the cache-flush bit', (bonjour, t) => {
 	let address = bonjour.publishAddress({ name: 'foo-bar', addresses: [ '192.168.1.1' ]});
 
-	address.on('anouncing', (records) => {
+	address.on('announcing', (records) => {
 		t.deepEqual(records.map(r => r.data), [ '192.168.1.1' ], 'Announces the given address');
 		t.deepEqual(records.map(r => r.flush), [ true ], 'A records are flushed');
 		bonjour.destroy();
@@ -191,7 +191,7 @@ test('bonjour.publishAddress - re-announces when the addresses change', (bonjour
 	let address = bonjour.publishAddress({ name: 'foo-bar', addresses: [ '192.168.1.1' ]});
 
 	address.on('up', () => {
-		address.once('anouncing', (records) => {
+		address.once('announcing', (records) => {
 			t.deepEqual(records.map(r => r.data), [ '10.0.0.1' ], 'Re-announces the new address');
 			bonjour.destroy();
 			t.end();
@@ -206,7 +206,7 @@ test('bonjour.publishAddress - several changes cost one announcement', (bonjour,
 
 	address.on('up', () => {
 		let announcements = 0;
-		address.on('anouncing', () => announcements++);
+		address.on('announcing', () => announcements++);
 
 		address.addresses = [ '10.0.0.1' ];
 		address.addresses = [ '10.0.0.2' ];

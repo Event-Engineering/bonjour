@@ -209,7 +209,7 @@ Emitted when the service is up, i.e. it has been announced on the network.
 
 Emitted if an error occurs while publishing the service, including when probing finds the service name already in use.
 
-#### `Event: anouncing`
+#### `Event: announcing`
 
 Emitted with the DNS records each time the service is announced.
 
@@ -293,7 +293,7 @@ The model returned by `bonjour.publishAddress()`. It can also be constructed dir
 
 Emitted when the address has been announced on the network.
 
-#### `Event: anouncing`
+#### `Event: announcing`
 
 Emitted with the DNS records each time the address is announced.
 
