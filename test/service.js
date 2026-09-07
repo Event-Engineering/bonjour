@@ -212,6 +212,59 @@ test('txt', (t) => {
 	t.end();
 });
 
+test('txt - numbers arrive as numbers', (t) => {
+	let s = new Service({ name: 'Foo-Bar', type: 'http', port: 3000 });
+	s.rawTxt = [ Buffer.from('port=3000'), Buffer.from('ratio=1.5'), Buffer.from('below=-3'), Buffer.from('zero=0') ];
+
+	t.deepEqual(s.txt, { port: 3000, ratio: 1.5, below: - 3, zero: 0 });
+	t.end();
+});
+
+test('txt - values that would not survive the trip stay as they were written', (t) => {
+	let s = new Service({ name: 'Foo-Bar', type: 'http', port: 3000 });
+	s.rawTxt = [
+		Buffer.from('serial=007'),
+		Buffer.from('version=1.10'),
+		Buffer.from('scientific=1e3'),
+		Buffer.from('padded= 12'),
+		Buffer.from('hex=0x10'),
+		Buffer.from('huge=9007199254740993'),
+		Buffer.from('endless=Infinity'),
+		Buffer.from('empty='),
+	];
+
+	t.deepEqual(s.txt, {
+		serial: '007',
+		version: '1.10',
+		scientific: '1e3',
+		padded: ' 12',
+		hex: '0x10',
+		huge: '9007199254740993',
+		endless: 'Infinity',
+		empty: '',
+	});
+	t.end();
+});
+
+test('txt - a number goes out and comes back a number', (t) => {
+	let published = new Service({ name: 'Foo-Bar', type: 'http', port: 3000, txt: { port: 3000 }});
+	let found = new Service({ name: 'Foo-Bar', type: 'http', port: 3000 });
+
+	t.deepEqual(published.rawTxt, [ Buffer.from('port=3000') ], 'Written as its digits');
+
+	found.rawTxt = published.rawTxt;
+	t.deepEqual(found.txt, { port: 3000 }, 'And read back as a number');
+	t.end();
+});
+
+test('txt - binary values are left alone', (t) => {
+	let s = new Service({ name: 'Foo-Bar', type: 'http', port: 3000, txtSettings: { binary: true }});
+	s.rawTxt = [ Buffer.from('port=3000') ];
+
+	t.deepEqual(s.txt, { port: Buffer.from('3000') }, 'Still a buffer, not a number');
+	t.end();
+});
+
 test('txt - valueless attributes', (t) => {
 	let s = new Service({ name: 'Foo-Bar', type: 'http', port: 3000, txt: { secure: true }});
 	t.deepEqual(s.rawTxt, [ Buffer.from('secure') ], 'Written without an equals sign');

@@ -358,7 +358,17 @@ A key with no value is a valueless attribute — written without an `=`, and rea
 bonjour.publishService({ name: 'my-web', type: 'http', port: 3000, txt: { secure: true } }); // "secure"
 ```
 
-Values are decoded to strings by default. Pass `{ binary: true }` to keep them as buffers — as `txtSettings` when publishing, or as `txt` when browsing:
+A value that reads as a number comes back as one, ready to use:
+
+```js
+bonjour.find({ type: 'http' }, (service) => {
+	console.log(service.txt.weight + 1); // 11, not '101'
+});
+```
+
+This only happens where the number can be written back out as the very same string, so nothing is quietly reshaped on the way past: `007`, `1.10`, `1e3`, `0x10`, ` 12` and anything beyond `Number.MAX_SAFE_INTEGER` all stay exactly as they were sent. Everything else decodes to a string.
+
+Values are otherwise decoded as strings. Pass `{ binary: true }` to keep them as buffers instead, untouched by any of the above — as `txtSettings` when publishing, or as `txt` when browsing:
 
 ```js
 bonjour.find({ type: 'qlab', protocol: 'udp', txt: { binary: true } }, (service) => {
