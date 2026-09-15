@@ -1,6 +1,6 @@
 {
 	"name": "@eventengineering/bonjour",
-	"version": "5.0.0-alpha",
+	"version": "5.0.0",
 	"description": "A Bonjour/Zeroconf implementation in pure JavaScript",
 	"main": "index.js",
 	"exports": {
