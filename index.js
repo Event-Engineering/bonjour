@@ -33,7 +33,7 @@ export default class Bonjour extends EventEmitter {
 	}
 
 	unpublishAll(cb) {
-		this.#registry.unpublishAll(cb);
+		return this.#registry.unpublishAll(cb);
 	}
 
 	find(opts, onup, ondown) {

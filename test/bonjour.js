@@ -69,6 +69,35 @@ test('bonjour.unpublishAll', (bonjour, t) => {
 	});
 });
 
+test('bonjour.unpublishAll - settles once the goodbyes have gone', (bonjour, t) => {
+	let service = bonjour.publishService({ name: 'foo', type: 'bar', port: 3000 });
+
+	service.on('up', async() => {
+		await bonjour.unpublishAll();
+
+		t.equal(service.published, false, 'Awaiting it waits for the service to go down');
+		bonjour.destroy();
+		t.end();
+	});
+});
+
+test('bonjour.destroy - stops the announcement timer', (bonjour, t) => {
+	let service = bonjour.publishService({ name: 'foo', type: 'bar', port: 3000 });
+
+	service.on('up', () => {
+		// the next announcement is scheduled once this event has been dealt with
+		setTimeout(() => {
+			let timers = () => process.getActiveResourcesInfo().filter(r => r === 'Timeout').length;
+			let before = timers();
+
+			bonjour.destroy();
+
+			t.equal(timers(), before - 1, 'The pending re-announcement is cleared');
+			t.end();
+		});
+	});
+});
+
 test('bonjour.find', (bonjour, t) => {
 	let next = afterAll(() => {
 		let browser = bonjour.find({ type: 'test' });
