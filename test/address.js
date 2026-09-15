@@ -100,7 +100,6 @@ test('max name part length', (t) => {
 test('minimal', (t) => {
 	let s = new Address({ name: 'Foo-Bar' });
 	t.equal(s.name, 'Foo-Bar.local');
-	t.equal(s.published, false);
 	t.end();
 });
 

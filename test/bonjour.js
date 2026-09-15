@@ -38,11 +38,11 @@ function test(name, fn) {
 }
 
 test('bonjour.publish', (bonjour, t) => {
-	let service = bonjour.publishService({ name: 'foo', type: 'bar', port: 3000 });
-	t.ok(service instanceof Service);
-	t.equal(service.published, false);
-	service.on('up', () => {
-		t.equal(service.published, true);
+	let publication = bonjour.publishService({ name: 'foo', type: 'bar', port: 3000 });
+	t.ok(publication instanceof Service, 'A publication of a service is still a service');
+	t.equal(publication.published, false);
+	publication.on('up', () => {
+		t.equal(publication.published, true);
 		bonjour.destroy();
 		t.end();
 	});
@@ -69,6 +69,35 @@ test('bonjour.unpublishAll', (bonjour, t) => {
 	});
 });
 
+test('bonjour.unpublishAll - settles once the goodbyes have gone', (bonjour, t) => {
+	let service = bonjour.publishService({ name: 'foo', type: 'bar', port: 3000 });
+
+	service.on('up', async() => {
+		await bonjour.unpublishAll();
+
+		t.equal(service.published, false, 'Awaiting it waits for the service to go down');
+		bonjour.destroy();
+		t.end();
+	});
+});
+
+test('bonjour.destroy - stops the announcement timer', (bonjour, t) => {
+	let service = bonjour.publishService({ name: 'foo', type: 'bar', port: 3000 });
+
+	service.on('up', () => {
+		// the next announcement is scheduled once this event has been dealt with
+		setTimeout(() => {
+			let timers = () => process.getActiveResourcesInfo().filter(r => r === 'Timeout').length;
+			let before = timers();
+
+			bonjour.destroy();
+
+			t.equal(timers(), before - 1, 'The pending re-announcement is cleared');
+			t.end();
+		});
+	});
+});
+
 test('bonjour.find', (bonjour, t) => {
 	let next = afterAll(() => {
 		let browser = bonjour.find({ type: 'test' });
@@ -78,13 +107,13 @@ test('bonjour.find', (bonjour, t) => {
 			if (s.name === 'Foo-Bar') {
 				t.equal(s.name, 'Foo-Bar');
 				t.equal(s.fqdn, 'Foo-Bar._test._tcp.local');
-				t.deepEqual(s.txt, [{}]);
-				t.deepEqual(s.rawTxt, [ Buffer.from('00', 'hex') ]);
+				t.deepEqual(s.txt, {});
+				t.deepEqual(s.rawTxt, [ Buffer.alloc(0) ]);
 			} else {
 				t.equal(s.name, 'Baz');
 				t.equal(s.fqdn, 'Baz._test._tcp.local');
-				t.deepEqual(s.txt, [{ foo: 'bar' }]);
-				t.deepEqual(s.rawTxt, [ Buffer.from('07666f6f3d626172', 'hex') ]);
+				t.deepEqual(s.txt, { foo: 'bar' });
+				t.deepEqual(s.rawTxt, [ Buffer.from('foo=bar') ]);
 			}
 
 			t.equal(s.host, os.hostname() + '.local');
@@ -120,8 +149,8 @@ test('bonjour.find - binary txt', (bonjour, t) => {
 
 		browser.on('up', (s) => {
 			t.equal(s.name, 'Foo');
-			t.deepEqual(s.txt, [{ bar: Buffer.from('buz') }]);
-			t.deepEqual(s.rawTxt, [ Buffer.from('076261723d62757a', 'hex') ]);
+			t.deepEqual(s.txt, { bar: Buffer.from('buz') });
+			t.deepEqual(s.rawTxt, [ Buffer.from('bar=buz') ]);
 			bonjour.destroy();
 			t.end();
 		});
@@ -174,4 +203,74 @@ test('bonjour.findOne - emitter', (bonjour, t) => {
 
 	bonjour.publishService({ name: 'Emitter', type: 'test', port: 3000 }).on('up', next());
 	bonjour.publishService({ name: 'Invalid', type: 'test2', port: 3000 }).on('up', next());
+});
+
+test('bonjour - a query the server cannot answer reaches the instance', (bonjour, t) => {
+	let service = bonjour.publishService({ name: 'Foo-Bar', type: 'test', port: 3000 });
+
+	service.on('up', () => {
+		let mdns = bonjour.find({ type: 'test', autostart: false })._mdns;
+		let warnings = [];
+		let errors = [];
+		let warn = console.warn;
+
+		console.warn = message => warnings.push(message);
+		bonjour.on('error', error => errors.push(error));
+		mdns.respond = (packet, cb) => cb(new Error('ENETUNREACH'));
+
+		mdns.emit('query', { questions: [{ name: '_test._tcp.local', type: 'PTR' }]});
+
+		console.warn = warn;
+
+		t.equal(errors.length, 1, 'The server forwards it to the bonjour instance');
+		t.equal(errors[0].message, 'ENETUNREACH', 'As the error itself');
+		t.equal(warnings.length, 1, 'And it is warned about once, not twice');
+
+		bonjour.destroy();
+		t.end();
+	});
+});
+
+test('bonjour.publishAddress - announcements carry the cache-flush bit', (bonjour, t) => {
+	let address = bonjour.publishAddress({ name: 'foo-bar', addresses: [ '192.168.1.1' ]});
+
+	address.on('announcing', (records) => {
+		t.deepEqual(records.map(r => r.data), [ '192.168.1.1' ], 'Announces the given address');
+		t.deepEqual(records.map(r => r.flush), [ true ], 'A records are flushed');
+		bonjour.destroy();
+		t.end();
+	});
+});
+
+test('bonjour.publishAddress - re-announces when the addresses change', (bonjour, t) => {
+	let address = bonjour.publishAddress({ name: 'foo-bar', addresses: [ '192.168.1.1' ]});
+
+	address.on('up', () => {
+		address.once('announcing', (records) => {
+			t.deepEqual(records.map(r => r.data), [ '10.0.0.1' ], 'Re-announces the new address');
+			bonjour.destroy();
+			t.end();
+		});
+
+		address.addresses = [ '10.0.0.1' ];
+	});
+});
+
+test('bonjour.publishAddress - several changes cost one announcement', (bonjour, t) => {
+	let address = bonjour.publishAddress({ name: 'foo-bar', addresses: [ '192.168.1.1' ]});
+
+	address.on('up', () => {
+		let announcements = 0;
+		address.on('announcing', () => announcements++);
+
+		address.addresses = [ '10.0.0.1' ];
+		address.addresses = [ '10.0.0.2' ];
+		address.addresses = [ '10.0.0.3' ];
+
+		setTimeout(() => {
+			t.equal(announcements, 1, 'Coalesced into a single re-announcement');
+			bonjour.destroy();
+			t.end();
+		}, 500);
+	});
 });
