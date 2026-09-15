@@ -38,11 +38,11 @@ function test(name, fn) {
 }
 
 test('bonjour.publish', (bonjour, t) => {
-	let service = bonjour.publishService({ name: 'foo', type: 'bar', port: 3000 });
-	t.ok(service instanceof Service);
-	t.equal(service.published, false);
-	service.on('up', () => {
-		t.equal(service.published, true);
+	let publication = bonjour.publishService({ name: 'foo', type: 'bar', port: 3000 });
+	t.ok(publication instanceof Service, 'A publication of a service is still a service');
+	t.equal(publication.published, false);
+	publication.on('up', () => {
+		t.equal(publication.published, true);
 		bonjour.destroy();
 		t.end();
 	});

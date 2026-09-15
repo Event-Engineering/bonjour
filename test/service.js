@@ -189,7 +189,6 @@ test('minimal', (t) => {
 	t.equal(s.fqdn, 'Foo-Bar._http._tcp.local');
 	t.equal(s.txt, undefined);
 	t.equal(s.subtypes, undefined);
-	t.equal(s.published, false);
 	t.end();
 });
 

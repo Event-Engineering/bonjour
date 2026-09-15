@@ -1,6 +1,6 @@
 import dgram from 'dgram';
 import tape from 'tape';
-import { Registry, Server } from '../index.js';
+import { Registry, Server, Service } from '../index.js';
 
 function port(cb) {
 	let s = dgram.createSocket('udp4');
@@ -21,6 +21,32 @@ function test(name, fn) {
 		});
 	});
 }
+
+test('one resource published twice keeps the two publications apart', (server, registry, t) => {
+	let other = new Registry(server);
+	let service = new Service({ name: 'foo', type: 'test', port: 3000 });
+
+	server.mdns.respond = (packet, cb) => cb();
+
+	let here = registry.publish(service, false);
+	let there = other.publish(service, false);
+
+	setTimeout(() => {
+		t.notEqual(here, there, 'Each registry has its own publication');
+		t.equal(here.resource, there.resource, 'Of the one service');
+		t.ok(here.published && there.published, 'Both of which went up');
+
+		here.stop(() => {
+			t.equal(here.published, false, 'Stopping one takes that one down');
+			t.equal(there.published, true, 'And leaves the other standing');
+
+			other.unpublishAll(() => {
+				server.mdns.destroy();
+				t.end();
+			});
+		});
+	}, 50);
+});
 
 test('an announcement that cannot be sent is reported', (server, registry, t) => {
 	let warnings = [];
