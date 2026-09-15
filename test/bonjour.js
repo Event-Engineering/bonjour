@@ -176,6 +176,32 @@ test('bonjour.findOne - emitter', (bonjour, t) => {
 	bonjour.publishService({ name: 'Invalid', type: 'test2', port: 3000 }).on('up', next());
 });
 
+test('bonjour - a query the server cannot answer reaches the instance', (bonjour, t) => {
+	let service = bonjour.publishService({ name: 'Foo-Bar', type: 'test', port: 3000 });
+
+	service.on('up', () => {
+		let mdns = bonjour.find({ type: 'test', autostart: false })._mdns;
+		let warnings = [];
+		let errors = [];
+		let warn = console.warn;
+
+		console.warn = message => warnings.push(message);
+		bonjour.on('error', error => errors.push(error));
+		mdns.respond = (packet, cb) => cb(new Error('ENETUNREACH'));
+
+		mdns.emit('query', { questions: [{ name: '_test._tcp.local', type: 'PTR' }]});
+
+		console.warn = warn;
+
+		t.equal(errors.length, 1, 'The server forwards it to the bonjour instance');
+		t.equal(errors[0].message, 'ENETUNREACH', 'As the error itself');
+		t.equal(warnings.length, 1, 'And it is warned about once, not twice');
+
+		bonjour.destroy();
+		t.end();
+	});
+});
+
 test('bonjour.publishAddress - announcements carry the cache-flush bit', (bonjour, t) => {
 	let address = bonjour.publishAddress({ name: 'foo-bar', addresses: [ '192.168.1.1' ]});
 
