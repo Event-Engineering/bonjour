@@ -1,17 +1,27 @@
 import Registry from './lib/registry.js';
 import Server from './lib/mdns-server.js';
 import Browser from './lib/browser.js';
+import { EventEmitter } from 'events';
 export { default as Service } from './lib/service.js';
 export { default as Address } from './lib/address.js';
 export { Registry, Server, Browser };
 
-export default class Bonjour {
+export default class Bonjour extends EventEmitter {
 	#server;
 	#registry;
 
 	constructor(opts) {
+		super();
+
 		this.#server = new Server(opts);
 		this.#registry = new Registry(this.#server);
+
+		this.#server.on('error', (error) => {
+			// the server has warned already, so only pass it on where it is wanted
+			if (this.listenerCount('error')) {
+				this.emit('error', error);
+			}
+		});
 	}
 
 	publishService(opts) {
