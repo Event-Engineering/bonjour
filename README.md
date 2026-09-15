@@ -33,7 +33,7 @@ Note that service names and types are limited to 15 characters — see [Publishi
 
 ## Architecture
 
-`Bonjour` is a thin facade over four moving parts. One mDNS socket is shared by everything created from the same instance.
+`Bonjour` is a thin facade over a few moving parts. One mDNS socket is shared by everything created from the same instance, and a resource is described once but published per registry.
 
 ```mermaid
 flowchart TD
@@ -41,14 +41,16 @@ flowchart TD
 	R["Registry<br>probe, announce, goodbye"]
 	S["Server<br>shared mDNS socket"]
 	W["Browser<br>discovery"]
+	P["Publication<br>published, start, stop"]
 	Sv["Service<br>PTR / SRV / TXT / A / AAAA records"]
 	Ad["Address<br>A / AAAA records"]
 
 	B --> R
 	B --> W
 	B --> S
-	R --> Sv
-	R --> Ad
+	R -->|one per resource| P
+	P --> Sv
+	P --> Ad
 	R -->|registers records| S
 	W -->|queries| S
 ```
@@ -60,7 +62,7 @@ import Bonjour, { Service, Address, Browser, Registry, Server } from '@eventengi
 ```
 
 - `Bonjour` (default) — the high level interface, and all most callers need.
-- `Service`, `Address` — the models describing what gets published. Can be built up front and handed to `publishService()` / `publishAddress()`.
+- `Service`, `Address` — the models describing what gets published. Can be built up front and handed to `publishService()` / `publishAddress()`, which return a [`Publication`](#publication) of them rather than a class you construct yourself.
 - `Browser`, `Registry`, `Server` — the lower level building blocks. See [Lower level API](#lower-level-api).
 
 ## API
@@ -78,7 +80,7 @@ The `options` are optional and will be used when initializing the underlying mul
 
 #### `const service = bonjour.publishService(options)`
 
-Publishes a new service and returns the [`Service`](#service) instance describing it. Publication is asynchronous — listen for the [`up`](#event-up-1) event to know when the service has been announced.
+Publishes a new service and returns a [`Publication`](#publication) of it. A publication behaves as the service it publishes — `publication.name`, `publication.txt` and the rest all reach through to it, and it satisfies `instanceof Service` — while also carrying what is true of this particular publication, such as [`published`](#publicationpublished) and [`stop()`](#publicationstopcallback). Publication is asynchronous: listen for the [`up`](#event-up-1) event to know when the service has been announced.
 
 Options are:
 
@@ -93,7 +95,7 @@ Options are:
 - `txtSettings` (object, optional) — passed to the TXT encoder. Set to `{ binary: true }` to keep TXT values as buffers.
 - `probe` (boolean, optional) — defaults to `true`. When `true` the network is probed for a conflicting service name before announcing, and an [`error`](#event-error) is emitted if the name is already taken. Set to `false` to announce immediately.
 
-A pre-built `Service` instance may be passed instead of an options object:
+A pre-built `Service` instance may be passed instead of an options object, and the same one may be published to more than one `Bonjour` instance — each publication keeps its own state, so stopping one leaves the others advertising:
 
 ```js
 import Bonjour, { Service } from '@eventengineering/bonjour';
@@ -122,7 +124,7 @@ IANA maintains a [list of official service types and port numbers](http://www.ia
 
 #### `const address = bonjour.publishAddress(options)`
 
-Publishes a hostname on the local network — the A/AAAA records of a service, without the service itself. Returns the [`Address`](#address) instance describing it.
+Publishes a hostname on the local network — the A/AAAA records of a service, without the service itself. Returns a [`Publication`](#publication) of it, which behaves as the [`Address`](#address) it publishes in the same way a published service does.
 
 Options are:
 
@@ -198,29 +200,51 @@ Stop looking for matching services.
 
 Broadcast the query again.
 
+### Publication
+
+One resource published by one registry, as returned by [`bonjour.publishService()`](#const-service--bonjourpublishserviceoptions) and [`bonjour.publishAddress()`](#const-address--bonjourpublishaddressoptions). Anything a publication does not answer for itself is answered by the resource beneath it, so it can be used wherever the service or address itself would be — including `instanceof`.
+
+Keeping this state here rather than on the resource is what lets one `Service` be published by several `Bonjour` instances at once, each with its own lifecycle.
+
+#### `publication.resource`
+
+The [`Service`](#service) or [`Address`](#address) being published.
+
+#### `publication.registry`
+
+The [`Registry`](#lower-level-api) publishing it.
+
+#### `publication.published`
+
+A boolean indicating whether this publication is currently announced on the network. A resource published twice has one of these per publication.
+
+#### `publication.start()`
+
+Publish it, if it has been stopped. Starting an already-started publication does nothing.
+
+#### `publication.stop([callback])`
+
+Unpublish it, sending a goodbye message. Returns a promise, and the optional `callback` is called once it has been unpublished. The resource is left untouched and may be published again afterwards.
+
+#### `publication.on(event, listener)` / `once` / `off`
+
+Listen to the resource's events. These are the resource's own events — a listener added directly to the resource sees them too — so a resource published twice fires `up` once per publication, which is why each event carries the publication it came from.
+
 ### Service
 
-The model returned by `bonjour.publishService()` and emitted by a browser's `up` / `down` events. It can also be constructed directly — `new Service(options)` takes the same options as [`bonjour.publishService()`](#const-service--bonjourpublishserviceoptions) and validates them immediately.
+The model describing a service, emitted by a browser's `up` / `down` events and wrapped by a [`Publication`](#publication) when published. It can also be constructed directly — `new Service(options)` takes the same options as [`bonjour.publishService()`](#const-service--bonjourpublishserviceoptions) and validates them immediately.
 
 #### `Event: up`
 
-Emitted when the service is up, i.e. it has been announced on the network.
+Emitted when the service is up, i.e. it has been announced on the network. The listener is called with the [`Publication`](#publication) that announced it.
 
 #### `Event: error`
 
-Emitted if an error occurs while publishing the service, including when probing finds the service name already in use.
+Emitted if an error occurs while publishing the service, including when probing finds the service name already in use. The listener is called with the error and then the [`Publication`](#publication) it concerns.
 
 #### `Event: announcing`
 
-Emitted with the DNS records each time the service is announced.
-
-#### `service.start()`
-
-Publish the service. Only available on a service that has been handed to `bonjour.publishService()` — it is the registry that provides it.
-
-#### `service.stop([callback])`
-
-Unpublish the service, sending a goodbye message. Returns a promise, and the optional `callback` is called once the service has been unpublished. As with `start()`, only available on a published service.
+Emitted with the DNS records each time the service is announced, followed by the [`Publication`](#publication) announcing them.
 
 #### `service.name`
 
@@ -270,10 +294,6 @@ The IP addresses advertised for the service's host, as an array. On a service yo
 
 For a discovered service, the remote address info of the packet it was found in — `address`, `family`, `port` and `size`.
 
-#### `service.published`
-
-A boolean indicating if the service is currently published.
-
 #### `service.toObject()` / `service.toJSON()`
 
 A plain object representation of the service, suitable for serialisation.
@@ -284,19 +304,15 @@ Static. Builds a `Service` by parsing a fully qualified domain name, e.g. `foo-b
 
 ### Address
 
-The model returned by `bonjour.publishAddress()`. It can also be constructed directly with `new Address(options)`, taking the same options as [`bonjour.publishAddress()`](#const-address--bonjourpublishaddressoptions).
+The model describing a hostname, wrapped by a [`Publication`](#publication) when published. It can also be constructed directly with `new Address(options)`, taking the same options as [`bonjour.publishAddress()`](#const-address--bonjourpublishaddressoptions).
 
 #### `Event: up`
 
-Emitted when the address has been announced on the network.
+Emitted when the address has been announced on the network. The listener is called with the [`Publication`](#publication) that announced it.
 
 #### `Event: announcing`
 
-Emitted with the DNS records each time the address is announced.
-
-#### `address.start()` / `address.stop([callback])`
-
-As per [`service.start()`](#servicestart) and [`service.stop([callback])`](#servicestopcallback).
+Emitted with the DNS records each time the address is announced, followed by the [`Publication`](#publication) announcing them.
 
 #### `address.name`
 
@@ -317,10 +333,6 @@ const address = bonjour.publishAddress({ name: 'my-nas', addresses: [ '192.168.1
 
 address.addresses = [ '192.168.1.11' ]; // goodbye .10, announce .11
 ```
-
-#### `address.published`
-
-A boolean indicating if the address is currently published.
 
 #### `address.toObject()` / `address.toJSON()`
 
@@ -394,7 +406,7 @@ registry.publishService({ name: 'my-web', type: 'http', port: 3000 });
 - `server.mdns` — the underlying multicast-dns instance.
 - `Event: error` — emitted when a query could not be answered, typically because the multicast send failed. Failing to answer costs that querier one answer and nothing else, so this is reported rather than thrown and is always warned about via `console.warn`; listening is optional.
 - `server.register(records)` / `server.unregister(records)` — manage the DNS records the server answers queries with.
-- `registry.publish(thing[, probe])` — publish a `Service` or `Address` instance directly.
+- `registry.publish(resource[, probe])` — publish a `Service` or `Address` instance directly, returning its [`Publication`](#publication).
 - `registry.publishService(options)` / `registry.publishAddress(options)` / `registry.unpublishAll([callback])` — as per the `Bonjour` methods of the same name.
 
 ## Migrating from 4.x
@@ -406,6 +418,7 @@ registry.publishService({ name: 'my-web', type: 'http', port: 3000 });
 - **TXT records on the wire are fixed.** 4.x length-prefixed each pair itself and then handed the result to dns-packet, which prefixed it again — so the records it published could not be read by other implementations. That framing is now left to dns-packet alone.
 - **TXT decoder settings moved.** When publishing, pass `txtSettings` instead of `txt` for encoder options; `txt` is now the record itself. Browsing still takes `txt`.
 - **`Service` is now a validating model.** Bad names, types and ports throw from the constructor rather than being published as-is — note the 15 character limit, which rules out names like `Apple TV` that 4.x accepted.
+- **Publishing returns a [`Publication`](#publication), not the service.** It behaves as the service in every respect that matters, `instanceof` included, so most code needs no change. What moved is `published`, `start()` and `stop()`: they belong to the publication now rather than to the service, because the same service can be published by more than one `Bonjour` instance and each publication has its own answer. For the same reason `up`, `announcing` and `error` each carry the publication they came from as a final argument.
 - **New:** [`bonjour.publishAddress()`](#const-address--bonjourpublishaddressoptions) for advertising a hostname on its own, the [`probe`](#publishing) option, `addresses` on a published service, `service.rawTxt`, `browser.servicesExport`, and the `Service`, `Address`, `Browser`, `Registry` and `Server` exports.
 
 ## License
