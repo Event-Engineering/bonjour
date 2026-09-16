@@ -32,6 +32,14 @@ export default class Bonjour extends EventEmitter {
 		return this.#registry.publishAddress(opts);
 	}
 
+	isPublished(resource) {
+		return this.#registry.isPublished(resource);
+	}
+
+	unpublish(resource, cb) {
+		return this.#registry.unpublish(resource, cb);
+	}
+
 	unpublishAll(cb) {
 		return this.#registry.unpublishAll(cb);
 	}
