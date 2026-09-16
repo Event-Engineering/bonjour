@@ -46,6 +46,67 @@ test('one resource published twice keeps the two publications apart', (server, r
 	}, 50);
 });
 
+test('unpublishing before it has started stops it going out at all', (server, registry, t) => {
+	let responses = 0;
+
+	server.mdns.respond = (packet, cb) => {
+		responses++;
+		cb();
+	};
+
+	let service = registry.publishService({ name: 'foo', type: 'test', port: 3000, probe: false });
+
+	registry.unpublish(service, () => {
+		setTimeout(() => {
+			t.equal(responses, 0, 'Nothing was ever announced');
+			t.equal(registry.isPublished(service), false, 'And it is not published');
+
+			server.mdns.destroy();
+			t.end();
+		}, 50);
+	});
+});
+
+test('unpublishAll before it has started stops it going out at all', (server, registry, t) => {
+	let responses = 0;
+
+	server.mdns.respond = (packet, cb) => {
+		responses++;
+		cb();
+	};
+
+	let address = registry.publishAddress({ name: 'foo-bar', addresses: [ '192.168.1.1' ]});
+
+	registry.unpublishAll(() => {
+		setTimeout(() => {
+			t.equal(responses, 0, 'Nothing was ever announced');
+			t.equal(registry.isPublished(address), false, 'And it is not published');
+
+			server.mdns.destroy();
+			t.end();
+		}, 50);
+	});
+});
+
+test('destroying before it has started stops it going out at all', (server, registry, t) => {
+	let responses = 0;
+
+	server.mdns.respond = (packet, cb) => {
+		responses++;
+		cb();
+	};
+
+	registry.publishService({ name: 'foo', type: 'test', port: 3000, probe: false });
+	registry.destroy();
+
+	setTimeout(() => {
+		t.equal(responses, 0, 'Nothing was ever announced');
+
+		server.mdns.destroy();
+		t.end();
+	}, 50);
+});
+
 function conflict(server) {
 	server.mdns.respond = (packet, cb) => cb();
 	server.mdns.query = (name, type, cb) => {
