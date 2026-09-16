@@ -28,17 +28,15 @@ test('one resource published twice keeps the two publications apart', (server, r
 
 	server.mdns.respond = (packet, cb) => cb();
 
-	let here = registry.publish(service, false);
-	let there = other.publish(service, false);
+	t.equal(registry.publish(service, false), service, 'Publishing hands back the service itself');
+	other.publish(service, false);
 
 	setTimeout(() => {
-		t.notEqual(here, there, 'Each registry has its own publication');
-		t.equal(here.resource, there.resource, 'Of the one service');
-		t.ok(here.published && there.published, 'Both of which went up');
+		t.ok(registry.isPublished(service) && other.isPublished(service), 'Both registries publish it');
 
-		here.stop(() => {
-			t.equal(here.published, false, 'Stopping one takes that one down');
-			t.equal(there.published, true, 'And leaves the other standing');
+		registry.unpublish(service, () => {
+			t.equal(registry.isPublished(service), false, 'Unpublishing from one takes that one down');
+			t.equal(other.isPublished(service), true, 'And leaves the other standing');
 
 			other.unpublishAll(() => {
 				server.mdns.destroy();
@@ -64,8 +62,8 @@ test('a name already in use is reported, not thrown', (server, registry, t) => {
 	conflict(server);
 	console.warn = message => warnings.push(message);
 
-	let publication = registry.publishService({ name: 'foo', type: 'test', port: 3000 });
-	publication.on('error', error => errors.push(error));
+	let service = registry.publishService({ name: 'foo', type: 'test', port: 3000 });
+	service.on('error', error => errors.push(error));
 
 	setTimeout(() => {
 		console.warn = warn;
@@ -73,7 +71,7 @@ test('a name already in use is reported, not thrown', (server, registry, t) => {
 		t.equal(errors.length, 1, 'The clash reaches whoever is listening');
 		t.ok(/already in use/.test(errors[0].message), 'Saying what went wrong');
 		t.equal(warnings.length, 1, 'And is warned about');
-		t.equal(publication.published, false, 'The service is not published');
+		t.equal(registry.isPublished(service), false, 'The service is not published');
 
 		server.mdns.destroy();
 		t.end();
@@ -116,9 +114,9 @@ test('an announcement that cannot be sent is reported', (server, registry, t) =>
 		t.equal(errors.length, 1, 'The error reaches the service');
 		t.equal(errors[0].message, 'ENETUNREACH', 'As the error itself');
 		t.equal(warnings.length, 1, 'And is warned about');
-		t.equal(service.published, false, 'A service that never went out is not called up');
+		t.equal(registry.isPublished(service), false, 'A service that never went out is not called up');
 
-		clearTimeout(service._announceTimer);
+		registry.destroy();
 		server.mdns.destroy();
 		t.end();
 	}, 100);
@@ -143,7 +141,7 @@ test('a goodbye that cannot be sent is reported, and still settles', (server, re
 
 			t.equal(errors.length, 1, 'The error reaches the service');
 			t.equal(warnings.length, 1, 'And is warned about');
-			t.equal(service.published, false, 'The service is marked down regardless');
+			t.equal(registry.isPublished(service), false, 'The service is marked down regardless');
 
 			server.mdns.destroy();
 			t.end();

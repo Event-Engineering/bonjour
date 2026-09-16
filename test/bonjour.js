@@ -38,11 +38,11 @@ function test(name, fn) {
 }
 
 test('bonjour.publish', (bonjour, t) => {
-	let publication = bonjour.publishService({ name: 'foo', type: 'bar', port: 3000 });
-	t.ok(publication instanceof Service, 'A publication of a service is still a service');
-	t.equal(publication.published, false);
-	publication.on('up', () => {
-		t.equal(publication.published, true);
+	let service = bonjour.publishService({ name: 'foo', type: 'bar', port: 3000 });
+	t.ok(service instanceof Service, 'Publishing hands back the service itself');
+	t.equal(bonjour.isPublished(service), false);
+	service.on('up', () => {
+		t.equal(bonjour.isPublished(service), true);
 		bonjour.destroy();
 		t.end();
 	});
@@ -54,7 +54,7 @@ test('bonjour.unpublishAll', (bonjour, t) => {
 		service.on('up', () => {
 			bonjour.unpublishAll((err) => {
 				t.error(err);
-				t.equal(service.published, false);
+				t.equal(bonjour.isPublished(service), false);
 				bonjour.destroy();
 				t.end();
 			});
@@ -75,7 +75,7 @@ test('bonjour.unpublishAll - settles once the goodbyes have gone', (bonjour, t) 
 	service.on('up', async() => {
 		await bonjour.unpublishAll();
 
-		t.equal(service.published, false, 'Awaiting it waits for the service to go down');
+		t.equal(bonjour.isPublished(service), false, 'Awaiting it waits for the service to go down');
 		bonjour.destroy();
 		t.end();
 	});
@@ -167,7 +167,7 @@ test('bonjour.find - down event', (bonjour, t) => {
 
 		browser.on('up', (s) => {
 			t.equal(s.name, 'Foo-Bar');
-			service.stop();
+			bonjour.unpublish(service);
 		});
 
 		browser.on('down', (s) => {
