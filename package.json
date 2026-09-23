@@ -18,7 +18,8 @@
 		"node": ">=22"
 	},
 	"dependencies": {
-		"multicast-dns": "^7.2.5"
+		"multicast-dns": "^7.2.5",
+		"typescript-eslint": "^8.70.1"
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",
