@@ -2,6 +2,7 @@ import path from 'path';
 import js from '@eslint/js';
 import globals from 'globals';
 import stylistic from '@stylistic/eslint-plugin';
+import tseslint from 'typescript-eslint';
 
 // eslint-plugin-filename-rules uses context.getFilename() which was removed in ESLint 10.
 // Inline a compatible replacement.
@@ -39,8 +40,9 @@ export default [
 	},
 	js.configs.recommended,
 	stylistic.configs.customize({ indent: 'tab', quotes: 'single', semi: true, jsx: true }),
+	...tseslint.configs.recommended.map(config => ({ ...config, files: [ '**/*.{ts,mts,cts,tsx}' ]})),
 	{
-		files: [ '**/*.{js,mjs,cjs,vue}' ],
+		files: [ '**/*.{js,mjs,cjs,vue,ts,mts,cts,tsx}' ],
 		languageOptions: {
 			ecmaVersion: 'latest',
 			sourceType: 'module',
