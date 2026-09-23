@@ -3,6 +3,7 @@
 	"version": "5.0.0",
 	"description": "A Bonjour/Zeroconf implementation in pure JavaScript",
 	"main": "index.js",
+	"types": "index.d.ts",
 	"exports": {
 		".": "./index.js",
 		"./package.json": "./package.json"
@@ -10,6 +11,7 @@
 	"type": "module",
 	"files": [
 		"index.js",
+		"index.d.ts",
 		"lib"
 	],
 	"engines": {
